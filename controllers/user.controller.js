@@ -1,3 +1,4 @@
+require('dotenv').config();
 const User = require('../models/user.schema');
 
 // Create a single product

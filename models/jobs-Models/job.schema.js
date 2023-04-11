@@ -12,16 +12,16 @@ const applicationRequestSchema = mongoose.Schema({
         type: String,
     },
 });
-
+// This is for jobs collection
 const jobPostData = mongoose.Schema({
+    startupsProfilePhoto:String,
+    startupsName:String,
     title: {
         type: String,
-      
     },
 
     description: {
         type: String,
-     
     },
 
     experience: Number,
@@ -36,6 +36,10 @@ const jobPostData = mongoose.Schema({
     salary: {
         type: Number,
     },
+    jobStatus:{
+        type: String,
+        enum: ['active', 'closed'],
+    },
 
     email: String,
 
@@ -46,6 +50,9 @@ const jobPostData = mongoose.Schema({
     },
     startingDate: {
         type: Date,
+    },
+    curriculum: {
+        type: String,
     },
     endingDate: {
         type: Date,
@@ -59,8 +66,10 @@ const jobPostData = mongoose.Schema({
     contractsPaper: {
         type: String,
     },
-    applicationRequest:[applicationRequestSchema], 
+    mentorsInfo: { mentorsBio: String, mentorsName: String, mentorsLinkedInURL: String },
+    applicationRequest: [applicationRequestSchema],
 });
+// this is for userJobs Collection and category collection
 const jobPostSchema = mongoose.Schema({
     email: String,
     jobs: [
@@ -68,7 +77,7 @@ const jobPostSchema = mongoose.Schema({
             jobId: {
                 type: String,
             },
-            applicationRequest:[applicationRequestSchema],
+            applicationRequest: [applicationRequestSchema],
             ...jobPostData.obj,
         },
     ],
@@ -80,5 +89,3 @@ const UserJobsModel = mongoose.model('userJobs', jobPostSchema);
 const JobDataModel = mongoose.model('job', jobPostData);
 
 module.exports = { UserJobsModel, jobPostData, JobDataModel };
-
-

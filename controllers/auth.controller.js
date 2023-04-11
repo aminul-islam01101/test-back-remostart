@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
@@ -128,7 +129,7 @@ const login = async (req, res) => {
 
     if (!userExist) {
         return res.send({
-            status:400,
+            status: 400,
             success: false,
             message: 'User is not found',
         });
@@ -136,7 +137,7 @@ const login = async (req, res) => {
 
     if (!bcrypt.compareSync(password, userExist.password)) {
         return res.send({
-            status:401,
+            status: 401,
             success: false,
             message: 'Incorrect password',
         });
@@ -152,7 +153,7 @@ const login = async (req, res) => {
     });
 
     return res.send({
-        status:200,
+        status: 200,
         success: true,
         message: 'User is logged in successfully',
         token: `Bearer ${token}`,
@@ -166,10 +167,8 @@ const user = (req, res) =>
         user: req.user,
     });
 
-
 module.exports = {
     register,
     login,
     user,
-  
 };

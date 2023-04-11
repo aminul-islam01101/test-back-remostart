@@ -53,7 +53,7 @@ const logger = require('./middleware/logger');
 const { mongoDB } = require('./configs/db');
 const { connectDataBase } = require('./configs/db');
 const routes = require('./routes/routes');
-require('./configs/passport');
+
 require('dotenv').config();
 
 // app.use(
@@ -90,6 +90,7 @@ app.set('trust proxy', 1);
 app.use(passport.initialize());
 app.use(passport.session());
 
+require('./configs/passport');
 require('./configs/passport.google');
 require('./configs/passport.linkedin');
 

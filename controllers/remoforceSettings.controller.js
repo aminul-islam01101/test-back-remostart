@@ -3,6 +3,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable prefer-template */
 const fs = require('fs');
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -26,12 +27,12 @@ const updateRemoProfileSettings = async (req, res) => {
 
     // console.log(homePageImages);
     // const uploadedFilesUrls = [];
+    let profileUrl = '';
 
     if (req.files.remoforceProfilePhoto.length) {
-        const url = await backBlazeSingle(req.files.remoforceProfilePhoto[0]);
-        console.log(url);
+        profileUrl = await backBlazeSingle(req.files.remoforceProfilePhoto[0]);
 
-        obj.remoforceProfilePhoto = url;
+        obj.remoforceProfilePhoto = profileUrl;
     }
     if (req.files.resume.length) {
         const url = await backBlazeSingle(req.files.resume[0]);
@@ -43,9 +44,15 @@ const updateRemoProfileSettings = async (req, res) => {
     // console.log(obj);
 
     // res.send('route ok')
+    // User.updateOne({ email }, user, { upsert: true });
 
     try {
         if (email) {
+            const updateUser = await User.updateOne(
+                { email },
+                { profilePhoto: profileUrl },
+                { upsert: true }
+            );
             const response = await Remoforce.updateOne({ email }, obj, { upsert: true });
             res.status(200).send(response);
         } else {
@@ -65,7 +72,6 @@ const updateRemoSkillsSettings = async (req, res) => {
 
     const obj = req.body;
     console.log(obj);
-    
 
     //  res.send('route ok')
 
@@ -108,6 +114,30 @@ const updateRemoEducationSettings = async (req, res) => {
     }
 };
 const updateRemoExperienceSettings = async (req, res) => {
+    // const obj = JSON.parse(req.body.obj);
+    const { email } = req.body;
+
+    const obj = req.body;
+
+    //  res.send('route ok')
+    console.log(email, obj);
+
+    try {
+        if (email) {
+            const response = await Remoforce.updateOne({ email }, obj, { upsert: true });
+            res.status(200).send(response);
+        } else {
+            // fs.unlinkSync(req.file.path);
+            res.status(404).send({ message: 'something' });
+        }
+    } catch (error) {
+        // fs.unlinkSync(req.file.path);
+        res.status(500).send({
+            message: error.message,
+        });
+    }
+};
+const updateRemoProjectsSettings = async (req, res) => {
     // const obj = JSON.parse(req.body.obj);
     const { email } = req.body;
 
@@ -325,11 +355,15 @@ const getRemoforceProfile = async (req, res) => {
 // };
 // get a start ups data
 
+// talents section
+
 module.exports = {
     updateRemoProfileSettings,
     updateRemoSkillsSettings,
     updateRemoEducationSettings,
     updateRemoExperienceSettings,
+    updateRemoProjectsSettings,
     getRemoforceProfile,
     updateRemoAccountSettings,
+   
 };

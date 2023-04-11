@@ -101,6 +101,7 @@ const remoforceSchema = mongoose.Schema({
             },
         },
     ],
+    softSkills: [String],
     selectedLanguages: [
         {
             language: String,
@@ -143,13 +144,23 @@ const remoforceSchema = mongoose.Schema({
     // experience settings---------------
     experienceDetails: [
         {
-          companyName: { type: String, },
-          position: { type: String,  },
-          startingDate: { type: Date,  },
-          endingDate: { type: Date, },
-          type: { type: String,  },
+            companyName: { type: String },
+            position: { type: String },
+            startingDate: { type: Date },
+            endingDate: { type: Date },
+            type: { type: String },
         },
-      ],
+    ],
+    projectDetails: [
+        {
+            startingDate: { type: Date },
+            endingDate: { type: Date },
+            projectName: { type: String },
+            projectDescription: { type: String },
+            projectLink: { type: String },
+            projectType: { type: String },
+        },
+    ],
     createdOn: {
         type: Date,
         default: Date.now,

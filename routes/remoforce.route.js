@@ -1,5 +1,14 @@
 const express = require('express');
-const { updateRemoProfileSettings, updateRemoSkillsSettings, updateRemoEducationSettings, updateRemoExperienceSettings, getRemoforceProfile, updateRemoAccountSettings } = require('../controllers/remoforceSettings.controller');
+const {
+    updateRemoProfileSettings,
+    updateRemoSkillsSettings,
+    updateRemoEducationSettings,
+    updateRemoExperienceSettings,
+    getRemoforceProfile,
+    updateRemoAccountSettings,
+    updateRemoProjectsSettings,
+    getMatchedTalents,
+} = require('../controllers/remoforceSettings.controller');
 const {
     updateGeneralSettingsPersonal,
     updateGeneralSettingsVerification,
@@ -7,8 +16,6 @@ const {
     updatePass,
     startupData,
     verificationRequest,
-
-
 } = require('../controllers/startupSettings.controller');
 const upload = require('../middleware/fileUploads');
 
@@ -40,36 +47,46 @@ router.put(
     '/remoforce-settings-profile',
     upload.fields([
         { name: 'remoforceProfilePhoto', maxCount: 1 },
-        { name: 'resume', maxCount: 1 }
+        { name: 'resume', maxCount: 1 },
     ]),
     multerErrorHandler,
     updateRemoProfileSettings
 );
 router.put(
     '/remoforce-settings-skills',
-    
+
     updateRemoSkillsSettings
 );
 router.put(
     '/remoforce-settings-education',
-    
+
     updateRemoEducationSettings
 );
 router.put(
     '/remoforce-settings-experience',
-    
+
     updateRemoExperienceSettings
 );
 router.put(
+    '/remoforce-settings-projects',
+
+    updateRemoProjectsSettings
+);
+router.put(
     '/remoforce-settings-account',
-    
+
     updateRemoAccountSettings
 );
 router.get(
     '/remoforce-profile/:email',
-    
+
     getRemoforceProfile
 );
+
+// talent route
+
+
+
 // router.put(
 //     '/settings-general-personal',
 //     upload.fields([
@@ -116,7 +133,6 @@ router.get(
 
 //     verificationRequest
 // );
-
 
 // get all user using GET method
 // router.get('/', getAllUser);

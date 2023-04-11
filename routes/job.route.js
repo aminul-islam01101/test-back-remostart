@@ -2,7 +2,22 @@ const express = require('express');
 const {
     getCategories,
     createJob,
-  getUsersJobs, deleteUsersJob, getAllJobs, insertApplication,acceptApplication, rejectApplication, getStatus
+    editContractsJob,
+    getContractsJobs,
+    contractsJob,
+    getUsersJobs,
+    deleteUsersJob,
+    getAllJobs,
+    insertApplication,
+    acceptApplication,
+    rejectApplication,
+    getCategoryJobs,
+    getUsersActiveJobs,
+    getUsersShadowingJobs,
+    closeUsersJob,
+    applicationRequests,
+
+    getStatus,
 } = require('../controllers/job.controller');
 // const {
 //     getCategories,
@@ -25,45 +40,54 @@ const multerErrorHandler = (err, req, res, next) => {
     }
 };
 
-// create user using POST method
-// router.post('/', createUser);
-// router.put('/:email', createUser);
-
 // Post job using POST method
 router.post('/public-job', createJob);
-
 router.post('/private-job', createJob);
 router.post('/internship', createJob);
-
+router.post('/gigs', createJob);
+router.post('/shadowing', createJob);
+router.post(
+    '/contracts',
+    upload.fields([{ name: 'contractsPaper', maxCount: 1 }]),
+    multerErrorHandler,
+    contractsJob
+);
+router.put(
+    '/contracts/:id',
+    upload.fields([{ name: 'contractsPaper', maxCount: 1 }]),
+    multerErrorHandler,
+    editContractsJob
+);
 
 // GET: get users job
 router.get('/categories', getCategories);
 router.get('/user-jobs/:email', getUsersJobs);
-router.get('/all-jobs', getAllJobs);
+router.get('/user-jobs/active/:email', getUsersActiveJobs);
+router.get('/user-jobs/closed/:email', getUsersActiveJobs);
+router.get('/user-jobs/shadowing/:email', getUsersShadowingJobs);
+// router.get('/contracts/:id', getContractsJobs);
 router.get('/apply-status', getStatus);
+// GET: Jobs
+router.get('/all-jobs', getAllJobs);
+router.get('/remoforce/shadowing', getCategoryJobs);
+router.get('/remoforce/public-job', getCategoryJobs);
+router.get('/remoforce/private-job', getCategoryJobs);
+router.get('/remoforce/internship', getCategoryJobs);
+router.get('/remoforce/gigs', getCategoryJobs);
+router.get('/remoforce/contracts', getCategoryJobs);
 
+// DELETE: a job from all job
+router.delete('/user-jobs/:id', deleteUsersJob);
+// DELETE: a job from all job
+router.put('/user-jobs/close/:id', closeUsersJob);
 
+// PUT: insert application request
+router.put('/user-jobs/:id', insertApplication);
+router.get('/user-jobs/allApplicationRequests/:id', applicationRequests);
 
-
- // DELETE: a job from all job
- router.delete('/user-jobs/:id', deleteUsersJob);
-
- // PUT: insert application request
- router.put('/user-jobs/:id', insertApplication);
-
- // PUT: update application status to accept
- router.put('/accept/:id', acceptApplication);
- // PUT: update application status to rejected
- router.put('/reject/:id', rejectApplication);
-
-
-// router.post('/public-job', publicJob);
-// router.post('/private-job', privateJob);
-// router.post('/internship', internship);
-// router.post('/contracts', contracts);
-// router.put('/contracts', upload.single('contractsPaper'), multerErrorHandler, contracts);
-
-// get single user using GET method
-// router.get('/:id', getUserById);
+// PUT: update application status to accept
+router.put('/accept/:id', acceptApplication);
+// PUT: update application status to rejected
+router.put('/reject/:id', rejectApplication);
 
 module.exports = router;

@@ -13,10 +13,11 @@ const userSchema = mongoose.Schema({
     //     required: [true, 'Please provide a password'],
     // },
 
-    signInMethod:{
-        type:String,
+    signInMethod: {
+        type: String,
         // default:"email-password"
-      },
+    },
+    profilePhoto: String,
 
     password: {
         type: String,
@@ -29,7 +30,7 @@ const userSchema = mongoose.Schema({
         // ],
         trim: true,
     },
-   
+
     personalPhone: {
         type: String,
         // required: true,
@@ -58,8 +59,8 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-   
-      googleId:String,
+
+    googleId: String,
     createdOn: {
         type: Date,
         default: Date.now,

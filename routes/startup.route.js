@@ -38,7 +38,7 @@ router.put(
     '/settings-profile',
     upload.fields([
         { name: 'startupIcon', maxCount: 1 },
-        { name: 'homePageImages', maxCount: 5 }
+        { name: 'homePageImages', maxCount: 5 },
     ]),
     multerErrorHandler,
     updateProfileSettings
@@ -89,7 +89,6 @@ router.put(
 
     verificationRequest
 );
-
 
 // get all user using GET method
 // router.get('/', getAllUser);

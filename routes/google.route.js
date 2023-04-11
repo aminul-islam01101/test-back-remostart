@@ -96,24 +96,24 @@ router.get('/login/success', async (req, res) => {
 //   }
 // });
 
-router.get('/login/failed', async(req, res) => {
+router.get('/login/failed', async (req, res) => {
     res.status(401).json({
         success: false,
         message: 'failure',
     });
 });
 
-router.get("/logout", (req, res, next) => {
-  try {
-    req.logout((err) => {
-      if (err) {
-        return next(err);
-      }
-      res.redirect(`${CLIENT_URL}`);
-    });
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
+router.get('/logout', (req, res, next) => {
+    try {
+        req.logout((err) => {
+            if (err) {
+                return next(err);
+            }
+            res.redirect(`${CLIENT_URL}`);
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
 });
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -134,7 +134,7 @@ router.get(
         // res.cookie('userRole', req.user.role,);
         //   res.cookie('token', `Bearer ${token}`, { secure:true, sameSite: 'none' });
         // res.cookie('userRole', req.user.role, { secure:true,  sameSite: 'none' });
-       
+
         // if (req.user.role === 'startup') {
         //     res.redirect(`${CLIENT_URL}/dashboard`);
         //     return;
@@ -147,7 +147,7 @@ router.get(
             res.redirect(`${CLIENT_URL}/dashboard`);
             return;
         }
-         res.redirect(CLIENT_URL);
+        res.redirect(CLIENT_URL);
     }
 );
 

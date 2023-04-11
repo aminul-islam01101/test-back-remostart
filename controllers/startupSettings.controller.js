@@ -3,6 +3,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable prefer-template */
 const fs = require('fs');
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -25,31 +26,32 @@ const updateProfileSettings = async (req, res) => {
     const { email } = obj;
     const startupIcon = req.files.startupIcon[0];
     const { homePageImages } = req.files;
-   
 
     console.log(homePageImages);
     const uploadedFilesUrls = [];
-    
 
+    let profileUrl = '';
     if (req.files.startupIcon.length) {
-        const url = await backBlazeSingle(req.files.startupIcon[0]);
-        console.log(url);
+        profileUrl = await backBlazeSingle(req.files.startupIcon[0]);
 
-        obj.startupIcon = url;
-      
+        obj.startupIcon = profileUrl;
     }
     if (homePageImages?.length) {
         for (const file of homePageImages) {
-            
             const url = await backBlazeSingle(file);
             uploadedFilesUrls.push(url);
         }
     }
     // removeFiles(req.files);
-    obj.homePageImages =uploadedFilesUrls
+    obj.homePageImages = uploadedFilesUrls;
 
     try {
         if (email) {
+            const updateUser = await User.updateOne(
+                { email },
+                { profilePhoto: profileUrl },
+                { upsert: true }
+            );
             const response = await Startup.updateOne({ email }, obj, { upsert: true });
             res.status(200).send(response);
         } else {
@@ -129,8 +131,6 @@ const updateGeneralSettingsVerification = async (req, res) => {
     // console.log(uploadedFilesUrls);
 
     // res.send('route ok');
-
- 
 
     try {
         if (email) {
