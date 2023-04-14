@@ -2,11 +2,61 @@
 const mongoose = require('mongoose');
 const allValidator = require('validator');
 
+const talentsDataSchema = new mongoose.Schema({
+    fullName: String,
+    email: String,
+    scorePercentage: Number,
+});
+
+const individualHistorySchema = new mongoose.Schema({
+    searchQuery: {
+        details: {
+            description: String,
+            title: String,
+        },
+        selectedLanguages: [String],
+        locationPreference: String,
+        softSkills: [String],
+        selectedSkills: [
+            {
+                skillName: String,
+                level: String,
+            },
+        ],
+        requiredTalents: Number,
+    },
+    requiredTalentsInHistory: [talentsDataSchema],
+});
+const talentHistorySchema = new mongoose.Schema({
+    transactionId: String,
+    searchHistory: [individualHistorySchema],
+});
+
+const talentRequestHistorySchema = new mongoose.Schema({
+    tierFree: {
+        type: [talentHistorySchema],
+        default: []
+    },
+    tier10: {
+        type: [talentHistorySchema],
+        default: []
+    },
+    tier15: {
+        type: [talentHistorySchema],
+        default: []
+    },
+});
+
 const startupUserSchema = new mongoose.Schema({
     // Personal Info--------------------------------
+    talentRequestHistory: {
+        type: talentRequestHistorySchema,
+        default: {}
+    },
+
     fullName: {
         type: String,
-        required: [true, 'FullName is required'],
+        // required: [true, 'FullName is required'],
         trim: true,
         maxLength: 40,
         minLength: 3,
@@ -14,7 +64,7 @@ const startupUserSchema = new mongoose.Schema({
 
     email: {
         type: String,
-        required: true,
+        // required: true,
 
         validate: {
             validator: allValidator.isEmail,
@@ -34,12 +84,12 @@ const startupUserSchema = new mongoose.Schema({
 
     personalPhone: {
         type: String,
-        required: true,
+        // required: true,
         trim: true,
-        validate: {
-            validator: allValidator.isMobilePhone,
-            message: (props) => `${props.value} is not valid mobile number`,
-        },
+        // validate: {
+        //     validator: allValidator.isMobilePhone,
+        //     message: (props) => `${props.value} is not valid mobile number`,
+        // },
     },
     // professional Details------------------------------
 
@@ -77,7 +127,7 @@ const startupUserSchema = new mongoose.Schema({
 
     companyEmail: {
         type: String,
-        required: true,
+        // required: true,
         // unique: true,
         validate: {
             validator: allValidator.isEmail,
