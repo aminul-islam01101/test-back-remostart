@@ -6,6 +6,8 @@ const talentsDataSchema = new mongoose.Schema({
     fullName: String,
     email: String,
     scorePercentage: Number,
+    skillLevel: String,
+    country: String,
 });
 
 const individualHistorySchema = new mongoose.Schema({
@@ -15,7 +17,7 @@ const individualHistorySchema = new mongoose.Schema({
             title: String,
         },
         selectedLanguages: [String],
-        locationPreference: String,
+        locationPreference: [String],
         softSkills: [String],
         selectedSkills: [
             {
@@ -35,15 +37,15 @@ const talentHistorySchema = new mongoose.Schema({
 const talentRequestHistorySchema = new mongoose.Schema({
     tierFree: {
         type: [talentHistorySchema],
-        default: []
+        default: [],
     },
     tier10: {
         type: [talentHistorySchema],
-        default: []
+        default: [],
     },
     tier15: {
         type: [talentHistorySchema],
-        default: []
+        default: [],
     },
 });
 
@@ -51,7 +53,7 @@ const startupUserSchema = new mongoose.Schema({
     // Personal Info--------------------------------
     talentRequestHistory: {
         type: talentRequestHistorySchema,
-        default: {}
+        default: {},
     },
 
     fullName: {
@@ -273,6 +275,10 @@ const startupUserSchema = new mongoose.Schema({
             type: String,
             trim: true,
         },
+    },
+    talentRequestPaymentDetails: {
+        tier: { type: String },
+        transactionId: { type: [String, null] },
     },
 
     //

@@ -2,22 +2,25 @@ const Remoforce = require('../models/remoForce.schema');
 const Startup = require('../models/startup.schema');
 
 const getMatchedTalents = async (req, res) => {
-    const queryData = {
-        email: 'webewe63fdf82@3mkz.com',
-        tier: 'Free',
-        transactionId: null,
-        details: { description: 'something', title: 'title' },
-        selectedLanguages: ['English', 'Spanish'],
-        locationPreference: 'Remote',
-        softSkills: ['Active listening', 'Adaptability'],
-        selectedSkills: [
-            { skillName: 'JavaScript', level: 'Beginner' },
-            // { skillName: 'Python', level: 'Pro' },
-            { skillName: 'Java', level: 'Beginner' },
-            { skillName: 'Rust', level: 'Beginner' },
-        ],
-        requiredTalents: 2,
-    };
+    const queryData = req.body;
+    // console.log(data);
+
+    // const queryData = {
+    //     email: 'webewe63fdf82@3mkz.com',
+    //     tier: 'Free',
+    //     transactionId: null,
+    //     details: { description: 'something', title: 'title' },
+    //     selectedLanguages: ['English', 'Spanish'],
+    //     locationPreference: ['Bangladesh'],
+    //     softSkills: ['Active listening', 'Adaptability'],
+    //     selectedSkills: [
+    //         { skillName: 'JavaScript', level: 'Beginner' },
+    //         // { skillName: 'Python', level: 'Pro' },
+    //         { skillName: 'Java', level: 'Beginner' },
+    //         { skillName: 'Rust', level: 'Beginner' },
+    //     ],
+    //     requiredTalents: 10,
+    // };
 
     try {
         const docs = await Remoforce.find({
@@ -25,7 +28,7 @@ const getMatchedTalents = async (req, res) => {
                 { 'selectedLanguages.language': { $in: queryData.selectedLanguages } },
                 { softSkills: { $all: queryData.softSkills } },
                 { selectedSkills: { $elemMatch: { $or: queryData.selectedSkills } } },
-                { 'jobPreference.locationPreference': queryData.locationPreference },
+                { 'personalDetails.country': { $in: queryData.locationPreference } },
             ],
         });
 
@@ -34,11 +37,24 @@ const getMatchedTalents = async (req, res) => {
         docs.forEach((doc) => {
             let score = 0;
 
-            if (
-                doc.jobPreference &&
-                doc.jobPreference.locationPreference === queryData.locationPreference
-            ) {
+            // if (
+            //     doc.jobPreference &&
+            //     doc.jobPreference.locationPreference === queryData.locationPreference
+            // ) {
+            //     score += 100;
+            // }
+
+            if (queryData.locationPreference[0] === 'Remote') {
                 score += 100;
+            } else {
+                const locationIntersection = queryData.locationPreference.find(
+                    (location) => location === doc?.personalDetails?.country
+                );
+                if (locationIntersection) {
+                    score += 100;
+                } else {
+                    score += 0;
+                }
             }
 
             const softSkillsIntersection = doc.softSkills.filter((skill) =>
@@ -89,7 +105,7 @@ const getMatchedTalents = async (req, res) => {
         results.sort((a, b) => b.scorePercentage - a.scorePercentage);
         let sortedTalent = [];
         if (results.length) {
-            const talentScoreFilter = results.filter((talent) => talent.scorePercentage >= 50);
+            const talentScoreFilter = results.filter((talent) => talent.scorePercentage >= 10);
             if (talentScoreFilter.length >= queryData.requiredTalents) {
                 sortedTalent = talentScoreFilter.slice(0, queryData.requiredTalents);
             } else {
@@ -99,6 +115,9 @@ const getMatchedTalents = async (req, res) => {
         const requiredTalentsInHistory = sortedTalent.map((talent) => ({
             email: talent.email,
             fullName: talent.fullName,
+            country: talent?.personalDetails?.country,
+            skillLevel: talent.jobPreference.jobLevel,
+
             scorePercentage: talent.scorePercentage,
         }));
         const talentHistory = {
@@ -127,14 +146,11 @@ const getMatchedTalents = async (req, res) => {
         // startupUser.talentRequestHistory[tier].transactionId=queryData.transactionId;
         // startupUser.talentRequestHistory[tier].searchHistory.push('something');
         const tier = `tier${queryData.tier}`;
-        const maxSearchLimit ={
-            tierFree:2,
-            tier10:15,
-            tier15:20,
-
-        } ;
-        
-        
+        const maxSearchLimit = {
+            tierFree: 2,
+            tier10: 15,
+            tier15: 20,
+        };
 
         if (!startupUser.talentRequestHistory) {
             startupUser.talentRequestHistory = {};
@@ -144,14 +160,12 @@ const getMatchedTalents = async (req, res) => {
             startupUser.talentRequestHistory[tier] = [];
         }
 
-      
-
         const tierHistory = startupUser.talentRequestHistory[tier];
 
         const matchedTransactionIndex = tierHistory.findIndex(
             (history) => history.transactionId === queryData.transactionId
         );
-        
+
         // if (matchedTransactionIndex >= 0) {
         //     const history = tierHistory[matchedTransactionIndex];
         //     if (history.searchHistory.length < maxSearchLimit[tier]) {
@@ -177,13 +191,40 @@ const getMatchedTalents = async (req, res) => {
         await startupUser.save();
 
         // console.log(results);
-        res.send(startupUser.talentRequestHistory);
+        res.send(requiredTalentsInHistory);
     } catch (error) {
         console.error(error);
         res.status(500).send('An error occurred');
     }
 };
+const getMatchedLastResults = async (req, res) => {
+    const { email, tier } = req.query;
+
+    console.log(email, tier);
+    // res.send('route ok')
+
+    try {
+        // Find the job post by ID
+        const startup = await Startup.findOne({ email });
+
+        const lastSearchResult =
+            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
+                .searchHistory[
+                startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
+                    .searchHistory.length - 1
+            ];
+
+        // Update the application request's status to "accepted"
+
+        // res.send(job.applicationRequest);
+        res.send(lastSearchResult);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+};
 
 module.exports = {
     getMatchedTalents,
+    getMatchedLastResults,
 };

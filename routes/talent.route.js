@@ -1,7 +1,8 @@
 const express = require('express');
-const { getMatchedTalents } = require('../controllers/talent.controller');
+const { getMatchedTalents, getMatchedLastResults } = require('../controllers/talent.controller');
 
 const router = express.Router();
 
-router.get('/talent-request', getMatchedTalents);
+router.post('/talent-request', getMatchedTalents);
+router.get('/last-results', getMatchedLastResults);
 module.exports = router;

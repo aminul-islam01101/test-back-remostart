@@ -56,6 +56,9 @@ const remoforceSchema = mongoose.Schema({
         birthDate: {
             type: Date,
         },
+        country: {
+            type: String,
+        },
         alternativeEmail: {
             type: String,
 
