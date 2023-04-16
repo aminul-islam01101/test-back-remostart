@@ -223,8 +223,46 @@ const getMatchedLastResults = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+const getMyRequests = async (req, res) => {
+    const { email, tier } = req.query;
+
+    console.log(email, tier);
+    // res.send('route ok')
+
+    try {
+        // Find the job post by ID
+        const startup = await Startup.findOne({ email });
+
+        const myRequests =
+            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1];
+        const totalMatch = startup.talentRequestHistory[tier][
+            startup.talentRequestHistory[tier].length - 1
+        ].searchHistory.reduce(
+            (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
+            0
+        );
+
+        // const totalMatch = startup.talentRequestHistory[tier].reduce(
+        //     (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
+        //     0
+        // );
+        console.log(totalMatch);
+        const myRequestData={
+            totalMatch,myRequests
+        }
+
+        // Update the application request's status to "accepted"
+
+        // res.send(job.applicationRequest);
+        res.send(myRequestData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+};
 
 module.exports = {
     getMatchedTalents,
     getMatchedLastResults,
+    getMyRequests,
 };
