@@ -189,9 +189,12 @@ const getMatchedTalents = async (req, res) => {
             tierHistory.push(newTransactionHistory);
         }
         await startupUser.save();
-
+        const startupsRequiredTalentsInHistory = {
+            startupsEmail: queryData.email,
+            requiredTalentsInHistory,
+        };
         // console.log(results);
-        res.send(requiredTalentsInHistory);
+        res.send(startupsRequiredTalentsInHistory);
     } catch (error) {
         console.error(error);
         res.status(500).send('An error occurred');
@@ -206,23 +209,28 @@ const getMatchedLastResults = async (req, res) => {
     try {
         // Find the job post by ID
         const startup = await Startup.findOne({ email });
-
-        const lastSearchResult =
-            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
-                .searchHistory[
+        if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
+            const lastSearchResult =
                 startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
-                    .searchHistory.length - 1
-            ];
+                    .searchHistory[
+                    startup.talentRequestHistory[tier][
+                        startup.talentRequestHistory[tier].length - 1
+                    ].searchHistory.length - 1
+                ];
 
-        // Update the application request's status to "accepted"
-
-        // res.send(job.applicationRequest);
-        res.send(lastSearchResult);
+            const startupsLastSearchResults = { startupsEmail: email, lastSearchResult };
+            res.send(startupsLastSearchResults);
+        } else {
+            const lastSearchResult = {};
+            const startupsLastSearchResults = { startupsEmail: email, lastSearchResult };
+            res.send(startupsLastSearchResults);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
     }
 };
+// my requests
 const getMyRequests = async (req, res) => {
     const { email, tier } = req.query;
 
@@ -232,29 +240,42 @@ const getMyRequests = async (req, res) => {
     try {
         // Find the job post by ID
         const startup = await Startup.findOne({ email });
+        console.log('--------', startup.talentRequestHistory);
 
-        const myRequests =
-            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1];
-        const totalMatch = startup.talentRequestHistory[tier][
-            startup.talentRequestHistory[tier].length - 1
-        ].searchHistory.reduce(
-            (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
-            0
-        );
+        if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
+            const myRequests =
+                startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1];
+            const totalMatch = startup.talentRequestHistory[tier][
+                startup.talentRequestHistory[tier].length - 1
+            ].searchHistory.reduce(
+                (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
+                0
+            );
 
-        // const totalMatch = startup.talentRequestHistory[tier].reduce(
-        //     (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
-        //     0
-        // );
-        console.log(totalMatch);
-        const myRequestData={
-            totalMatch,myRequests
+            // const totalMatch = startup.talentRequestHistory[tier].reduce(
+            //     (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
+            //     0
+            // );
+            console.log(totalMatch);
+            const myRequestData = {
+                totalMatch,
+                myRequests,
+            };
+
+            // Update the application request's status to "accepted"
+
+            // res.send(job.applicationRequest);
+            res.send(myRequestData);
+        } else {
+            const totalMatch = 0;
+            const myRequests = {};
+            const myRequestData = {
+                totalMatch,
+                myRequests,
+            };
+
+            res.send(myRequestData);
         }
-
-        // Update the application request's status to "accepted"
-
-        // res.send(job.applicationRequest);
-        res.send(myRequestData);
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
