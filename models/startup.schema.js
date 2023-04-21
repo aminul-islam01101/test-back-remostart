@@ -8,6 +8,10 @@ const talentsDataSchema = new mongoose.Schema({
     scorePercentage: Number,
     skillLevel: String,
     country: String,
+    interviewStatus: {
+        type: String,
+        enum: ['not requested', 'requested', 'accepted', 'rejected'],
+    },
 });
 
 const individualHistorySchema = new mongoose.Schema({

@@ -35,10 +35,10 @@ const userSchema = mongoose.Schema({
         type: String,
         // required: true,
         trim: true,
-        validate: {
-            validator: allValidator.isMobilePhone,
-            message: (props) => `${props.value} is not valid mobile number`,
-        },
+        // validate: {
+        //     validator: allValidator.isMobilePhone,
+        //     message: (props) => `${props.value} is not valid mobile number`,
+        // },
     },
     email: {
         type: String,

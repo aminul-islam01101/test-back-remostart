@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+const mongoose = require('mongoose');
 const Remoforce = require('../models/remoForce.schema');
 const Startup = require('../models/startup.schema');
 
@@ -117,8 +119,8 @@ const getMatchedTalents = async (req, res) => {
             fullName: talent.fullName,
             country: talent?.personalDetails?.country,
             skillLevel: talent.jobPreference.jobLevel,
-
             scorePercentage: talent.scorePercentage,
+            interviewStatus: 'not requested',
         }));
         const talentHistory = {
             searchQuery: queryData,
@@ -281,9 +283,151 @@ const getMyRequests = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+// request for interview
+const interviewRequests = async (req, res) => {
+    const requestBody = {
+        startupsEmail: 'webewe63fdf82@3mkz.com',
+        searchId: '64426c076f87207e8f0686b5',
+        talentsEmail: ['biyimo857r6@dicopto.com', 'aniketsomkuwar1101@gmail.com'],
+        searchQuery: {
+            details: {
+                description: 'sfd',
+                title: 'sdf',
+            },
+            selectedLanguages: ['English'],
+            locationPreference: ['Remote'],
+            softSkills: ['Adaptability'],
+            selectedSkills: [
+                {
+                    skillName: 'React',
+
+                    level: 'Beginner',
+                },
+                {
+                    skillName: 'HTML',
+
+                    level: 'Intermediate',
+                },
+            ],
+            requiredTalents: 24,
+        },
+        interviewStatus: 'requested',
+        tier: 'tierFree',
+        transactionId: null,
+    };
+
+    try {
+        // Find startup user
+        const startup = await Startup.findOne({ email: requestBody.startupsEmail });
+
+        startup.talentRequestHistory[requestBody.tier]
+            .find((searchHistory) => searchHistory.transactionId === requestBody.transactionId)
+            .searchHistory.find(
+                (search) =>
+                    search._id.toString() ===
+                    mongoose.Types.ObjectId(requestBody.searchId).toString()
+            )
+            .requiredTalentsInHistory.forEach((talent) => {
+                if (requestBody.talentsEmail.includes(talent.email)) {
+                    talent.interviewStatus = requestBody.interviewStatus;
+                }
+            });
+        await startup.save();
+
+        const remoObject = {
+            startupsEmail: requestBody.startupsEmail,
+            searchQuery: requestBody.searchQuery,
+            interviewStatus: requestBody.interviewStatus,
+            jobId: requestBody.searchId,
+        };
+        const remoforce = await Remoforce.find({ email: { $in: requestBody.talentsEmail } });
+
+        const promises = remoforce.map((remo) => {
+            if (!remo.allRequests) {
+                remo.allRequests = [];
+                remo.allRequests.push(remoObject);
+            } else {
+                const alreadyExist = remo.allRequests.find(
+                    (request) => request.jobId === requestBody.searchId
+                );
+                if (!alreadyExist) {
+                    remo.allRequests.push(remoObject);
+                }
+            }
+            return remo.save();
+        });
+
+        await Promise.all(promises);
+
+        res.send(startup);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+};
+// job request accept or reject
+
+const remoforceRequestAcceptance = async (req, res) => {
+    const requestBody = {
+        startupsEmail: 'webewe63fdf82@3mkz.com',
+        remoforceEmail: 'biyimo857r6@dicopto.com',
+        jobId: '64426c076f87207e8f0686b5',
+        interviewStatus: 'accepted',
+    };
+
+    try {
+        // Find startup user
+        const startup = await Startup.findOne({ email: requestBody.startupsEmail });
+        const remoforce = await Remoforce.findOne({ email: requestBody.remoforceEmail });
+
+        const getSearchHistoryById = (id) => {
+            const tiers = Object.keys(startup.talentRequestHistory.toObject()).filter(
+                (item) => item !== '_id'
+            );
+
+            console.log('------------tier', tiers);
+            for (let i = 0; i < tiers.length; i += 1) {
+                const tier = startup.talentRequestHistory[tiers[i]];
+
+                for (let j = 0; j < tier.length; j += 1) {
+                    const searchHistory = tier[j].searchHistory.find(
+                        (history) =>
+                            history._id.toString() === mongoose.Types.ObjectId(id).toString()
+                    );
+                    console.log(
+                        `searching for id ${id} in tier ${i}, request ${j}, searchHistory ${searchHistory}`
+                    );
+                    if (searchHistory) {
+                        return searchHistory;
+                    }
+                }
+            }
+            return 'id not found'; // id not found
+        };
+
+        const searchHistory = getSearchHistoryById(requestBody.jobId);
+
+        searchHistory.requiredTalentsInHistory.find(
+            (talent) => talent.email === requestBody.remoforceEmail
+        ).interviewStatus = requestBody.interviewStatus;
+        await startup.save();
+
+        remoforce.allRequests.find(
+            (request) => request.jobId === requestBody.jobId
+        ).interviewStatus = requestBody.interviewStatus;
+        await remoforce.save();
+
+        res.send(remoforce);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+};
 
 module.exports = {
     getMatchedTalents,
     getMatchedLastResults,
     getMyRequests,
+    interviewRequests,
+    remoforceRequestAcceptance,
 };
