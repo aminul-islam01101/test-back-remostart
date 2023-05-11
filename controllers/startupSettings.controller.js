@@ -230,7 +230,7 @@ const verificationRequest = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
-// get a start ups data
+// get available slots
 
 module.exports = {
     updateProfileSettings,
@@ -240,4 +240,5 @@ module.exports = {
     updatePass,
     startupData,
     verificationRequest,
+   
 };

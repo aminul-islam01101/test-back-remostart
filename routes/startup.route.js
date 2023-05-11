@@ -7,6 +7,7 @@ const {
     updatePass,
     startupData,
     verificationRequest,
+ 
 } = require('../controllers/startupSettings.controller');
 const upload = require('../middleware/fileUploads');
 
@@ -89,6 +90,7 @@ router.put(
 
     verificationRequest
 );
+
 
 // get all user using GET method
 // router.get('/', getAllUser);

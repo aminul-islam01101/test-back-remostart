@@ -98,7 +98,7 @@ const remoforceSchema = mongoose.Schema({
             skillName: String,
             level: {
                 type: String,
-                enum: ['Beginner', 'Intermediate', 'Professional'],
+                // enum: ['Beginner', 'Intermediate', 'Professional'],
             },
         },
     ],
@@ -118,7 +118,7 @@ const remoforceSchema = mongoose.Schema({
         jobType: {
             type: String,
 
-            enum: ['Shadowing', 'Public Job', 'Private Job', 'Internship', 'Gigs', 'Contract'],
+            // enum: ['Shadowing', 'Public Job', 'Private Job', 'Internship', 'Gigs', 'Contract'],
         },
         jobIndustry: String,
         jobLevel: {
@@ -170,6 +170,7 @@ const remoforceSchema = mongoose.Schema({
                 type: String,
                 enum: ['not requested', 'requested', 'accepted', 'rejected'],
             },
+            interviewSchedule:{},
             jobId: { type: String },
         },
     ],

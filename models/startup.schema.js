@@ -13,7 +13,7 @@ const talentsDataSchema = new mongoose.Schema({
         enum: ['not requested', 'requested', 'accepted', 'rejected'],
     },
 });
-
+// const eventSchema =new mongoose.Schema()
 const individualHistorySchema = new mongoose.Schema({
     searchQuery: {
         details: {
@@ -31,6 +31,7 @@ const individualHistorySchema = new mongoose.Schema({
         ],
         requiredTalents: Number,
     },
+    events:[],
     requiredTalentsInHistory: [talentsDataSchema],
 });
 const talentHistorySchema = new mongoose.Schema({
@@ -284,7 +285,10 @@ const startupUserSchema = new mongoose.Schema({
         tier: { type: String },
         transactionId: { type: [String, null] },
     },
-
+    calenderTokens:{
+        accessToken: { type: String },
+        refreshToken: { type: String },
+    }
     //
     // createdAt: {
     //     type: Date,

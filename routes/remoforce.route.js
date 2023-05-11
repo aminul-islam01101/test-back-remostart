@@ -8,15 +8,16 @@ const {
     updateRemoAccountSettings,
     updateRemoProjectsSettings,
     getMatchedTalents,
+    getMyJobRequests
 } = require('../controllers/remoforceSettings.controller');
-const {
-    updateGeneralSettingsPersonal,
-    updateGeneralSettingsVerification,
-    verifyPass,
-    updatePass,
-    startupData,
-    verificationRequest,
-} = require('../controllers/startupSettings.controller');
+// const {
+//     updateGeneralSettingsPersonal,
+//     updateGeneralSettingsVerification,
+//     verifyPass,
+//     updatePass,
+//     startupData,
+//     verificationRequest,
+// } = require('../controllers/startupSettings.controller');
 const upload = require('../middleware/fileUploads');
 
 const multerErrorHandler = (err, req, res, next) => {
@@ -81,6 +82,11 @@ router.get(
     '/remoforce-profile/:email',
 
     getRemoforceProfile
+);
+router.get(
+    '/all-my-requests/:email',
+
+    getMyJobRequests
 );
 
 // talent route

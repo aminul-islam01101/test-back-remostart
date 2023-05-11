@@ -354,8 +354,16 @@ const getRemoforceProfile = async (req, res) => {
 //     }
 // };
 // get a start ups data
+const getMyJobRequests = async (req, res) => {
+    const { email } = req.params;
+    try {
+        const remoUser = await Remoforce.findOne({ email });
+        res.send(remoUser.allRequests);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
 
-// talents section
 
 module.exports = {
     updateRemoProfileSettings,
@@ -365,5 +373,6 @@ module.exports = {
     updateRemoProjectsSettings,
     getRemoforceProfile,
     updateRemoAccountSettings,
+    getMyJobRequests
    
 };
