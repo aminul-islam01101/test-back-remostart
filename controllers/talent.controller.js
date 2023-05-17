@@ -374,6 +374,8 @@ const interviewRequests = async (req, res) => {
             searchQuery: requestBody.searchQuery,
             interviewStatus: requestBody.interviewStatus,
             jobId: requestBody.searchId,
+            startupName: requestBody.startupName,
+            startupIcon: requestBody.startupIcon
         };
         const remoforce = await Remoforce.find({ email: { $in: requestBody.talentsEmail } });
 
@@ -413,9 +415,8 @@ const remoforceRequestAcceptance = async (req, res) => {
     //     interviewStatus: 'accepted',
     // };
     const requestBody = req.body;
-    
-    console.log({requestBody});
-    
+
+    console.log({ requestBody });
 
     try {
         // Find startup user
@@ -449,22 +450,25 @@ const remoforceRequestAcceptance = async (req, res) => {
 
         const searchHistory = getSearchHistoryById(requestBody.jobId);
 
-        const bookedEvent =searchHistory.events.find((event) => event.meetLink===requestBody.bookedSlot.selectedMeetLink)
-       
-        console.log('------------', bookedEvent);
-        
-        bookedEvent.slotStatus=requestBody.slotStatus
+        const bookedEvent = searchHistory.events.find(
+            (event) => event.meetLink === requestBody.bookedSlot.selectedMeetLink
+        );
 
-        searchHistory.requiredTalentsInHistory.find(
-            (talent) => talent.email === requestBody.remoforceEmail
-        ).interviewStatus = requestBody.interviewStatus;
+        // console.log('------------', bookedEvent);
+
+        bookedEvent.slotStatus = requestBody.slotStatus;
+const talentData= searchHistory.requiredTalentsInHistory.find(
+    (talent) => talent.email === requestBody.remoforceEmail
+)
+talentData.interviewStatus = requestBody.interviewStatus;
+talentData.interviewSchedule = requestBody.bookedSlot;
         await startup.save();
 
-      const remoforceRequest=  remoforce.allRequests.find(
+        const remoforceRequest = remoforce.allRequests.find(
             (request) => request.jobId === requestBody.jobId
-        )
-     remoforceRequest.interviewStatus = requestBody.interviewStatus;
-     remoforceRequest.interviewSchedule=requestBody.bookedSlot
+        );
+        remoforceRequest.interviewStatus = requestBody.interviewStatus;
+        remoforceRequest.interviewSchedule = requestBody.bookedSlot;
         await remoforce.save();
 
         res.status(200).json({ message: 'schedule booked' });
@@ -511,6 +515,54 @@ const getAvailableSlots = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const createdEvents = async (req, res) => {
+    const { email, jobId } = req.query;
+
+    try {
+        const startup = await Startup.findOne({ email });
+        const getSearchHistoryById = (id) => {
+            const tiers = Object.keys(startup.talentRequestHistory.toObject()).filter(
+                (item) => item !== '_id'
+            );
+
+            for (let i = 0; i < tiers.length; i += 1) {
+                const tier = startup.talentRequestHistory[tiers[i]];
+
+                for (let j = 0; j < tier.length; j += 1) {
+                    const searchHistory = tier[j].searchHistory.find(
+                        (history) =>
+                            history._id.toString() === mongoose.Types.ObjectId(id).toString()
+                    );
+
+                    if (searchHistory) {
+                        return searchHistory;
+                    }
+                }
+            }
+            return 'id not found'; // id not found
+        };
+
+        const searchHistory = getSearchHistoryById(jobId);
+        const { events } = searchHistory;
+        // console.log('---------', availableSlots);
+        res.send(events);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
+const  getStartupsDetail= async (req, res) => {
+    const { email } = req.query;
+   
+
+    try {
+        const startup = await Startup.findOne({ email});
+      
+        res.send(startup);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
 
 module.exports = {
     getMatchedTalents,
@@ -519,4 +571,6 @@ module.exports = {
     interviewRequests,
     remoforceRequestAcceptance,
     getAvailableSlots,
+    createdEvents,
+    getStartupsDetail
 };

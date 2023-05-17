@@ -6,6 +6,8 @@ const {
     interviewRequests,
     remoforceRequestAcceptance,
     getAvailableSlots,
+    createdEvents,
+    getStartupsDetail
 } = require('../controllers/talent.controller');
 
 const router = express.Router();
@@ -16,4 +18,7 @@ router.get('/my-requests', getMyRequests);
 router.post('/interview-requests', interviewRequests);
 router.post('/remo-request-acceptance', remoforceRequestAcceptance);
 router.get('/available-slots', getAvailableSlots);
+router.get('/created-events', createdEvents);
+router.get('/get-startup', getStartupsDetail);
+
 module.exports = router;

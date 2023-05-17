@@ -12,6 +12,7 @@ const talentsDataSchema = new mongoose.Schema({
         type: String,
         enum: ['not requested', 'requested', 'accepted', 'rejected'],
     },
+    interviewSchedule:{}
 });
 // const eventSchema =new mongoose.Schema()
 const individualHistorySchema = new mongoose.Schema({
