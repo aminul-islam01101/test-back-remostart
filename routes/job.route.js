@@ -88,6 +88,6 @@ router.get('/user-jobs/allApplicationRequests/:id', applicationRequests);
 // PUT: update application status to accept
 router.put('/accept/:id', acceptApplication);
 // PUT: update application status to rejected
-router.put('/reject/:id', rejectApplication);
+router.put('/reject', rejectApplication);
 
 module.exports = router;

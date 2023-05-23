@@ -1,6 +1,7 @@
 /* eslint-disable new-cap */
 const mongoose = require('mongoose');
 const allValidator = require('validator');
+const { applicationRequestSchema } = require('./jobs-Models/job.schema');
 
 const remoforceSchema = mongoose.Schema({
     fullName: {
@@ -174,8 +175,10 @@ const remoforceSchema = mongoose.Schema({
             },
             interviewSchedule:{},
             jobId: { type: String },
+            remoforceEmail:{ type: String },
         },
     ],
+    allApplications:[applicationRequestSchema],
     createdOn: {
         type: Date,
         default: Date.now,
