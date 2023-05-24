@@ -47,13 +47,25 @@ const getRedirect = async (req, res) => {
     const accessToken = tokens.access_token;
     const refreshToken = tokens.refresh_token;
     const expirationDate = tokens.expiry_date;
-    // console.log({ accessToken, refreshToken, expirationDate });
+    console.log({ accessToken}, {refreshToken });
 
-    await Startup.findOneAndUpdate(
-        { email },
-        { calenderTokens: { accessToken, refreshToken } },
-        { upsert: true }
-    );
+    if (refreshToken) {
+        await Startup.findOneAndUpdate(
+            { email },
+            { calenderTokens: { accessToken, refreshToken } },
+            { upsert: true }
+        );
+    }
+    else{
+        await Startup.findOneAndUpdate(
+            { email },
+            { calenderTokens: { accessToken } },
+            { upsert: true }
+        );
+    
+    }
+
+  
     let redirectUrl = '';
     if (id && job) {
         redirectUrl = `${process.env.CLIENT}/dashboard/${job}/${id}/view-applicants`;

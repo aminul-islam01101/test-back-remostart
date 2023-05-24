@@ -20,6 +20,17 @@ const applicationRequestSchema = mongoose.Schema({
     country:{
         type: String,
     },
+    title:{
+        type: String,
+    },
+    startupsProfilePhoto:{
+        type: String,
+    },
+    startupsName:{
+        type: String,
+    },
+    interviewSchedule:{}
+
 });
 // This is for jobs collection
 const jobPostData = mongoose.Schema({

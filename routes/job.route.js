@@ -18,6 +18,7 @@ const {
     applicationRequests,
 
     getStatus,
+    createInterviewSchedule
 } = require('../controllers/job.controller');
 // const {
 //     getCategories,
@@ -87,6 +88,10 @@ router.get('/user-jobs/allApplicationRequests/:id', applicationRequests);
 
 // PUT: update application status to accept
 router.put('/accept/:id', acceptApplication);
+
+
+// create-interview-schedule from startup
+router.put('/create-interview-schedule', createInterviewSchedule);
 // PUT: update application status to rejected
 router.put('/reject', rejectApplication);
 

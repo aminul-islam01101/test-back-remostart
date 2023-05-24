@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const Category = require('../models/category.schema');
 const backBlazeSingle = require('../configs/backBlazeSingle');
@@ -513,7 +514,16 @@ const insertApplication = async (req, res) => {
     session.startTransaction();
     try {
         const jobId = req.params.id;
-        const { applicantsName, applicantsEmail, applicationStatus, email, country } = req.body;
+        const {
+            applicantsName,
+            applicantsEmail,
+            applicationStatus,
+            email,
+            country,
+            title,
+            startupsProfilePhoto,
+            startupsName,
+        } = req.body;
         const applicationData = {
             applicantsName,
             applicantsEmail,
@@ -521,6 +531,9 @@ const insertApplication = async (req, res) => {
             startupsEmail: email,
             jobId,
             country,
+            title,
+            startupsProfilePhoto,
+            startupsName,
         };
 
         // Check if the application request already exists in UserJobsModel
@@ -599,11 +612,8 @@ const insertApplication = async (req, res) => {
 // accept application
 // delete a job of user
 const rejectApplication = async (req, res) => {
-  
     const { email, jobId, applicantsEmail } = req.body;
     const status = 'rejected';
-
-   
 
     try {
         // Find the job post by ID
@@ -638,9 +648,10 @@ const rejectApplication = async (req, res) => {
         ].applicationStatus = status;
         await userJobPosts.save();
         const remoforce = await Remoforce.findOne({ email: applicantsEmail });
-        const applicationToUpdate = remoforce.allApplications.find((application) => application.jobId === jobId);
-      
-        
+        const applicationToUpdate = remoforce.allApplications.find(
+            (application) => application.jobId === jobId
+        );
+
         applicationToUpdate.applicationStatus = status;
         await remoforce.save();
 
@@ -652,9 +663,8 @@ const rejectApplication = async (req, res) => {
 };
 const acceptApplication = async (req, res) => {
     const { id } = req.params;
-    const { email, jobId, applicantsEmail } = req.body;
-    const status = 'accepted';
-    console.log("-------------",id, jobId);
+    const { email, jobId, applicantsEmail,status } = req.body;
+    console.log('-------------', id, jobId);
 
     try {
         // Find the job post by ID
@@ -672,7 +682,6 @@ const acceptApplication = async (req, res) => {
         }
         jobPost.applicationRequest[applicationRequestIndex].applicationStatus = status;
 
-    
         await jobPost.save();
 
         // Update the user's job posts as well
@@ -690,9 +699,10 @@ const acceptApplication = async (req, res) => {
         await userJobPosts.save();
 
         const remoforce = await Remoforce.findOne({ email: applicantsEmail });
-        const applicationToUpdate = remoforce.allApplications.find((application) => application.jobId === jobId);
-      
-        
+        const applicationToUpdate = remoforce.allApplications.find(
+            (application) => application.jobId === jobId
+        );
+
         applicationToUpdate.applicationStatus = status;
         await remoforce.save();
 
@@ -765,6 +775,51 @@ const applicationRequests = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+const createInterviewSchedule = async (req, res) => {
+    const { applicantsEmail, jobId, startupsEmail, interviewStatus, scheduleDetails } = req.body;
+
+    // res.send('route ok')
+
+    try {
+        // Find the job post by ID
+        const job = await JobDataModel.findById(jobId);
+        if (!job) {
+            return res.status(404).send('Job post not found');
+        }
+        const jobToUpdate = job.applicationRequest.find(
+            (request) => request.applicantsEmail === applicantsEmail
+        );
+        jobToUpdate.interviewSchedule = scheduleDetails;
+        jobToUpdate.applicationStatus = interviewStatus;
+        // Update the application request's status to "accepted"
+        await job.save();
+        // Update the user's job posts as well
+        const userJobPosts = await UserJobsModel.findOne({ email: startupsEmail });
+        if (!userJobPosts) {
+            return res.status(404).send('Job post not found');
+        }
+        const jobsToUpdate = userJobPosts.jobs.find((post) => post.jobId === jobId);
+        jobsToUpdate.interviewSchedule = scheduleDetails;
+        jobsToUpdate.applicationStatus = interviewStatus;
+        
+        await userJobPosts.save();
+
+        // Update the remoforce all application posts as well
+        const remoforce = await Remoforce.findOne({ email: applicantsEmail });
+
+        const applicationToUpdate = remoforce.allApplications.find(
+            (application) => application.jobId === jobId
+        );
+        applicationToUpdate.interviewSchedule = scheduleDetails;
+        applicationToUpdate.applicationStatus = interviewStatus;
+        await remoforce.save();
+
+        res.status(200).send('successful');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+};
 
 module.exports = {
     getCategories,
@@ -785,5 +840,6 @@ module.exports = {
     // getContractsJobs,
     editContractsJob,
     applicationRequests,
+    createInterviewSchedule,
 };
 // module.exports = { getCategories, publicJob, privateJob, internship, contracts };
