@@ -1,7 +1,9 @@
 /* eslint-disable new-cap */
 const mongoose = require('mongoose');
 const allValidator = require('validator');
-const { applicationRequestSchema } = require('./jobs-Models/job.schema');
+const { applicationRequestSchema, notificationSchema } = require('./jobs-Models/job.schema');
+
+
 
 const remoforceSchema = mongoose.Schema({
     fullName: {
@@ -176,9 +178,17 @@ const remoforceSchema = mongoose.Schema({
             interviewSchedule:{},
             jobId: { type: String },
             remoforceEmail:{ type: String },
+            timestamp: {
+                type: Date,
+                default: Date.now, // Add a default value of the current date and time
+              },
         },
     ],
     allApplications:[applicationRequestSchema],
+    notifications:[notificationSchema],
+
+  
+  
     createdOn: {
         type: Date,
         default: Date.now,

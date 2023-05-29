@@ -125,6 +125,7 @@ const getMatchedTalents = async (req, res) => {
         const talentHistory = {
             searchQuery: queryData,
             requiredTalentsInHistory,
+            
         };
         //  update startup user with search history
         const startupUser = await Startup.findOne({ email: queryData.email });
@@ -247,6 +248,8 @@ const getMyRequests = async (req, res) => {
         if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
             const myRequests =
                 startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1];
+
+
             const totalMatch = startup.talentRequestHistory[tier][
                 startup.talentRequestHistory[tier].length - 1
             ].searchHistory.reduce(
@@ -316,7 +319,6 @@ const interviewRequests = async (req, res) => {
     //     transactionId: null,
     // };
     const requestBody = req.body;
-  
 
     try {
         // Find startup user
@@ -333,15 +335,12 @@ const interviewRequests = async (req, res) => {
 
         if (!eventsProp?.events?.length) {
             eventsProp.events = requestBody.events;
-       
 
             // eventsProp.events.push(requestBody.events)
         } else {
             requestBody.events.forEach((event) => {
                 eventsProp.events.push(event);
             });
-
-           
         }
 
         startup.talentRequestHistory[requestBody.tier]
@@ -372,8 +371,8 @@ const interviewRequests = async (req, res) => {
         const remoforce = await Remoforce.find({ email: { $in: requestBody.talentsEmail } });
 
         const promises = remoforce.map((remo) => {
-            console.log('------------' ,remo.email);
-            
+            console.log('------------', remo.email);
+
             const remoObject = {
                 startupsEmail: requestBody.startupsEmail,
                 searchQuery: requestBody.searchQuery,
@@ -381,11 +380,21 @@ const interviewRequests = async (req, res) => {
                 jobId: requestBody.searchId,
                 startupName: requestBody.startupName,
                 startupIcon: requestBody.startupIcon,
-                remoforceEmail:remo.email
+                remoforceEmail: remo.email,
             };
-            console.log({remoObject});
-            
-            
+            console.log({ remoObject });
+            const remoNotificationObject = {
+                jobId: requestBody.searchId,
+                startupsEmail: requestBody.startupsEmail,
+                startupName: requestBody.startupName,
+                remoforceEmail: remo.email,
+                jobTitle: requestBody.searchQuery.details.title,
+                type: 'talent-request',
+                stage: 'talent-request',
+                status: 'unread',
+                remoforceName: remo.fullName,
+            };
+
             if (!remo.allRequests) {
                 remo.allRequests = [];
                 remo.allRequests.push(remoObject);
@@ -395,6 +404,20 @@ const interviewRequests = async (req, res) => {
                 );
                 if (!alreadyExist) {
                     remo.allRequests.push(remoObject);
+                }
+            }
+            if (!remo.notifications) {
+                remo.notifications = [];
+                remo.notifications.push(remoNotificationObject);
+            } else {
+                const alreadyExist = remo.notifications.find(
+                    (request) =>
+                        request.jobId === remoNotificationObject.jobId &&
+                        request.type === remoNotificationObject.type &&
+                        request.stage === remoNotificationObject.stage
+                );
+                if (!alreadyExist) {
+                    remo.notifications.push(remoNotificationObject);
                 }
             }
             return remo.save();
@@ -463,11 +486,11 @@ const remoforceRequestAcceptance = async (req, res) => {
         // console.log('------------', bookedEvent);
 
         bookedEvent.slotStatus = requestBody.slotStatus;
-const talentData= searchHistory.requiredTalentsInHistory.find(
-    (talent) => talent.email === requestBody.remoforceEmail
-)
-talentData.interviewStatus = requestBody.interviewStatus;
-talentData.interviewSchedule = requestBody.bookedSlot;
+        const talentData = searchHistory.requiredTalentsInHistory.find(
+            (talent) => talent.email === requestBody.remoforceEmail
+        );
+        talentData.interviewStatus = requestBody.interviewStatus;
+        talentData.interviewSchedule = requestBody.bookedSlot;
         await startup.save();
 
         const remoforceRequest = remoforce.allRequests.find(
@@ -557,13 +580,12 @@ const createdEvents = async (req, res) => {
     }
 };
 
-const  getStartupsDetail= async (req, res) => {
+const getStartupsDetail = async (req, res) => {
     const { email } = req.query;
-   
 
     try {
-        const startup = await Startup.findOne({ email});
-      
+        const startup = await Startup.findOne({ email });
+
         res.send(startup);
     } catch (error) {
         res.status(500).send(error.message);
@@ -578,5 +600,5 @@ module.exports = {
     remoforceRequestAcceptance,
     getAvailableSlots,
     createdEvents,
-    getStartupsDetail
+    getStartupsDetail,
 };

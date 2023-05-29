@@ -18,7 +18,8 @@ const {
     applicationRequests,
 
     getStatus,
-    createInterviewSchedule
+    createInterviewSchedule,
+    allAppliedJobs
 } = require('../controllers/job.controller');
 // const {
 //     getCategories,
@@ -69,13 +70,16 @@ router.get('/user-jobs/shadowing/:email', getUsersShadowingJobs);
 // router.get('/contracts/:id', getContractsJobs);
 router.get('/apply-status', getStatus);
 // GET: Jobs
-router.get('/all-jobs', getAllJobs);
+router.get('/all-jobs/:email', getAllJobs);
 router.get('/remoforce/shadowing', getCategoryJobs);
 router.get('/remoforce/public-job', getCategoryJobs);
 router.get('/remoforce/private-job', getCategoryJobs);
 router.get('/remoforce/internship', getCategoryJobs);
 router.get('/remoforce/gigs', getCategoryJobs);
 router.get('/remoforce/contracts', getCategoryJobs);
+
+// Get:: all applied jobs from remoforce 
+router.get('/remoforce/all-applied-jobs/:email', allAppliedJobs);
 
 // DELETE: a job from all job
 router.delete('/user-jobs/:id', deleteUsersJob);

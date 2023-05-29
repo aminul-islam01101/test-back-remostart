@@ -34,10 +34,15 @@ const individualHistorySchema = new mongoose.Schema({
     },
     events:[],
     requiredTalentsInHistory: [talentsDataSchema],
+    timestamp: {
+        type: Date,
+        default: Date.now, // Add a default value of the current date and time
+      },
 });
 const talentHistorySchema = new mongoose.Schema({
     transactionId: String,
     searchHistory: [individualHistorySchema],
+   
 });
 
 const talentRequestHistorySchema = new mongoose.Schema({

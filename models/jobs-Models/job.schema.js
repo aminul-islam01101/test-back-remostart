@@ -1,5 +1,50 @@
 const mongoose = require('mongoose');
 
+const notificationSchema = new mongoose.Schema({
+    jobId:  {
+        type: String,
+      
+      },
+    startupsEmail:  {
+        type: String,
+      
+      },
+    startupName:  {
+        type: String,
+      
+      },
+    remoforceEmail:  {
+        type: String,
+      
+      },
+    jobTitle:  {
+        type: String,
+      
+      },
+    type: {
+      type: String,
+      
+    },
+    stage: {
+      type: String,
+     
+    },
+    status: {
+      type: String,
+    
+    },
+    remoforceName:  {
+        type: String,
+      
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now, // Add a default value of the current date and time
+      },
+  });
+
+
+
 const applicationRequestSchema = mongoose.Schema({
     applicantsName: {
         type: String,
@@ -108,4 +153,4 @@ const jobPostSchema = mongoose.Schema({
 const UserJobsModel = mongoose.model('userJobs', jobPostSchema);
 const JobDataModel = mongoose.model('job', jobPostData);
 
-module.exports = { UserJobsModel, applicationRequestSchema, jobPostData, JobDataModel };
+module.exports = { UserJobsModel, applicationRequestSchema, jobPostData, JobDataModel, notificationSchema};

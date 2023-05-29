@@ -9,6 +9,7 @@ const talentRouter = require('./talent.route');
 const googleRoute = require('./google.route');
 const linkedinRoute = require('./linkedin.route');
 const CalenderRoute = require('./calender.route');
+const NotificationRoute = require('./notification.route');
 
 
 const router = express.Router();
@@ -26,6 +27,8 @@ router.use('/api/job', jobRouter);
 router.use('/auth', googleRoute);
 router.use('/auth', linkedinRoute);
 router.use('/calender', CalenderRoute);
+router.use('/api/notification', NotificationRoute);
+
 
 
 

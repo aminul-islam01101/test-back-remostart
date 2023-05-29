@@ -384,14 +384,48 @@ const getUsersJobs = async (req, res) => {
 };
 // get all jobs
 const getAllJobs = async (req, res) => {
+    const { email } = req.params;
     try {
-        const jobs = await JobDataModel.find();
+        const jobs = await JobDataModel.find({
+            $or: [
+              { applicationRequest: { $exists: false } },
+              { applicationRequest: { $size: 0 } },
+              { 
+                applicationRequest: { 
+                    $not:{  $elemMatch: { applicantsEmail: email } } 
+                } 
+              }
+            ]
+          }).exec();
         res.status(200).json(jobs);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 };
+// get all jobs
+const allAppliedJobs = async (req, res) => {
+    const { email } = req.params;
+    try {
+        const remoforce = await Remoforce.findOne({
+            email
+          });
+          const appliedJobs = remoforce?.allApplications || [];
+        res.status(200).json(appliedJobs);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+// const getAllJobs = async (req, res) => {
+//     try {
+//         const jobs = await JobDataModel.find();
+//         res.status(200).json(jobs);
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).send('Server Error');
+//     }
+// };
 
 // GET category wise jobs
 const getCategoryJobs = async (req, res) => {
@@ -722,16 +756,16 @@ const getStatus = async (req, res) => {
 
         const remoforce = await Remoforce.findOne({ email });
         const country = remoforce?.personalDetails?.country || 'Not Provided';
-        const job = await JobDataModel.findOne({
-            _id: jobId,
-        }).exec();
+        const job = await JobDataModel.findById(
+             jobId,
+        ).exec();
 
         if (!job) {
             // If the job is not found, return an error response
             return res.status(404).json({ error: 'Job not found' });
         }
         if (job.applicationRequest.length === 0) {
-            return res.send({ status: 'notApplied', country });
+            return res.send({ status: 'notApplied', country ,jobDetails:job });
         }
 
         // Get the application request for the current user (based on their email)
@@ -743,11 +777,11 @@ const getStatus = async (req, res) => {
 
         if (!applicationRequest) {
             // If there is no application request for the current user, return an error response
-            return res.send({ status: 'notApplied', country });
+            return res.send({ status: 'notApplied', country ,jobDetails:job });
         }
 
         // Return the application status for the current user
-        return res.json({ status: applicationRequest.applicationStatus, country });
+        return res.json({ status: applicationRequest.applicationStatus, country,jobDetails:job });
     } catch (error) {
         // If there is an error while querying the database, return a generic error response
         console.error(error);
@@ -779,6 +813,7 @@ const createInterviewSchedule = async (req, res) => {
     const { applicantsEmail, jobId, startupsEmail, interviewStatus, scheduleDetails } = req.body;
 
     // res.send('route ok')
+console.log(jobId.yellow.bold);
 
     try {
         // Find the job post by ID
@@ -810,6 +845,7 @@ const createInterviewSchedule = async (req, res) => {
         const applicationToUpdate = remoforce.allApplications.find(
             (application) => application.jobId === jobId
         );
+        console.log(remoforce);
         applicationToUpdate.interviewSchedule = scheduleDetails;
         applicationToUpdate.applicationStatus = interviewStatus;
         await remoforce.save();
@@ -841,5 +877,6 @@ module.exports = {
     editContractsJob,
     applicationRequests,
     createInterviewSchedule,
+    allAppliedJobs
 };
 // module.exports = { getCategories, publicJob, privateJob, internship, contracts };
