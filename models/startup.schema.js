@@ -1,6 +1,7 @@
 /* eslint-disable new-cap */
 const mongoose = require('mongoose');
 const allValidator = require('validator');
+const { notificationSchema } = require('./jobs-Models/job.schema');
 
 const talentsDataSchema = new mongoose.Schema({
     fullName: String,
@@ -294,7 +295,8 @@ const startupUserSchema = new mongoose.Schema({
     calenderTokens:{
         accessToken: { type: String },
         refreshToken: { type: String },
-    }
+    },
+    notifications:[notificationSchema],
     //
     // createdAt: {
     //     type: Date,

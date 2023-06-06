@@ -1,49 +1,38 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
-    jobId:  {
+    jobId: {
         type: String,
-      
-      },
-    startupsEmail:  {
+    },
+    startupsEmail: {
         type: String,
-      
-      },
-    startupName:  {
+    },
+    startupName: {
         type: String,
-      
-      },
-    remoforceEmail:  {
+    },
+    remoforceEmail: {
         type: String,
-      
-      },
-    jobTitle:  {
+    },
+    jobTitle: {
         type: String,
-      
-      },
+    },
     type: {
-      type: String,
-      
+        type: String,
     },
     stage: {
-      type: String,
-     
+        type: String,
     },
     status: {
-      type: String,
-    
-    },
-    remoforceName:  {
         type: String,
-      
-      },
-      timestamp: {
+    },
+    remoforceName: {
+        type: String,
+    },
+    timestamp: {
         type: Date,
         default: Date.now, // Add a default value of the current date and time
-      },
-  });
-
-
+    },
+});
 
 const applicationRequestSchema = mongoose.Schema({
     applicantsName: {
@@ -56,31 +45,30 @@ const applicationRequestSchema = mongoose.Schema({
     applicationStatus: {
         type: String,
     },
-    startupsEmail:{
+    startupsEmail: {
         type: String,
     },
-    jobId:{
+    jobId: {
         type: String,
     },
-    country:{
+    country: {
         type: String,
     },
-    title:{
+    title: {
         type: String,
     },
-    startupsProfilePhoto:{
+    startupsProfilePhoto: {
         type: String,
     },
-    startupsName:{
+    startupsName: {
         type: String,
     },
-    interviewSchedule:{}
-
+    interviewSchedule: {},
 });
 // This is for jobs collection
 const jobPostData = mongoose.Schema({
-    startupsProfilePhoto:String,
-    startupsName:String,
+    startupsProfilePhoto: String,
+    startupsName: String,
     title: {
         type: String,
     },
@@ -101,7 +89,7 @@ const jobPostData = mongoose.Schema({
     salary: {
         type: Number,
     },
-    jobStatus:{
+    jobStatus: {
         type: String,
         enum: ['active', 'closed'],
     },
@@ -153,4 +141,10 @@ const jobPostSchema = mongoose.Schema({
 const UserJobsModel = mongoose.model('userJobs', jobPostSchema);
 const JobDataModel = mongoose.model('job', jobPostData);
 
-module.exports = { UserJobsModel, applicationRequestSchema, jobPostData, JobDataModel, notificationSchema};
+module.exports = {
+    UserJobsModel,
+    applicationRequestSchema,
+    jobPostData,
+    JobDataModel,
+    notificationSchema,
+};

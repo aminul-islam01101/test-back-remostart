@@ -168,6 +168,7 @@ const remoforceSchema = mongoose.Schema({
     allRequests: [
         {
             startupsEmail: { type: String },
+            remoforceName: { type: String },
             startupName: { type: String },
             startupIcon: { type: String },
             searchQuery: { type: {} },
