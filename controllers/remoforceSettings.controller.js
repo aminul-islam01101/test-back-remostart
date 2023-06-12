@@ -364,7 +364,6 @@ const getMyJobRequests = async (req, res) => {
     }
 };
 
-
 module.exports = {
     updateRemoProfileSettings,
     updateRemoSkillsSettings,
@@ -373,6 +372,5 @@ module.exports = {
     updateRemoProjectsSettings,
     getRemoforceProfile,
     updateRemoAccountSettings,
-    getMyJobRequests
-   
+    getMyJobRequests,
 };

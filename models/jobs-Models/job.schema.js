@@ -28,6 +28,9 @@ const notificationSchema = new mongoose.Schema({
     remoforceName: {
         type: String,
     },
+    jobType: {
+        type: String,
+    },
     timestamp: {
         type: Date,
         default: Date.now, // Add a default value of the current date and time
@@ -64,6 +67,10 @@ const applicationRequestSchema = mongoose.Schema({
         type: String,
     },
     interviewSchedule: {},
+    timestamp: {
+        type: Date,
+        default: Date.now, // Add a default value of the current date and time
+    },
 });
 // This is for jobs collection
 const jobPostData = mongoose.Schema({

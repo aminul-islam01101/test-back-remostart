@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const Category = require('../models/category.schema');
 const backBlazeSingle = require('../configs/backBlazeSingle');
@@ -8,6 +7,7 @@ const backBlazeSingle = require('../configs/backBlazeSingle');
 
 const { UserJobsModel, jobPostData, JobDataModel } = require('../models/jobs-Models/job.schema');
 const Remoforce = require('../models/remoForce.schema');
+const Startup = require('../models/startup.schema');
 
 const getCategories = (req, res) => {
     Category.find({}, (err, data) => {
@@ -388,15 +388,15 @@ const getAllJobs = async (req, res) => {
     try {
         const jobs = await JobDataModel.find({
             $or: [
-              { applicationRequest: { $exists: false } },
-              { applicationRequest: { $size: 0 } },
-              { 
-                applicationRequest: { 
-                    $not:{  $elemMatch: { applicantsEmail: email } } 
-                } 
-              }
-            ]
-          }).exec();
+                { applicationRequest: { $exists: false } },
+                { applicationRequest: { $size: 0 } },
+                {
+                    applicationRequest: {
+                        $not: { $elemMatch: { applicantsEmail: email } },
+                    },
+                },
+            ],
+        }).exec();
         res.status(200).json(jobs);
     } catch (err) {
         console.error(err.message);
@@ -408,9 +408,9 @@ const allAppliedJobs = async (req, res) => {
     const { email } = req.params;
     try {
         const remoforce = await Remoforce.findOne({
-            email
-          });
-          const appliedJobs = remoforce?.allApplications || [];
+            email,
+        });
+        const appliedJobs = remoforce?.allApplications || [];
         res.status(200).json(appliedJobs);
     } catch (err) {
         console.error(err.message);
@@ -557,6 +557,10 @@ const insertApplication = async (req, res) => {
             title,
             startupsProfilePhoto,
             startupsName,
+            type,
+            stage,
+            status,
+            jobType,
         } = req.body;
         const applicationData = {
             applicantsName,
@@ -568,6 +572,19 @@ const insertApplication = async (req, res) => {
             title,
             startupsProfilePhoto,
             startupsName,
+        };
+        const startupNotificationObject = {
+            jobId,
+            startupsEmail: email,
+
+            startupName: startupsName,
+            remoforceName: applicantsName,
+            remoforceEmail: applicantsEmail,
+            jobTitle: title,
+            type,
+            stage,
+            status,
+            jobType,
         };
 
         // Check if the application request already exists in UserJobsModel
@@ -632,7 +649,24 @@ const insertApplication = async (req, res) => {
             }
         }
         await remoforce.save({ session });
-
+        // updating notification
+        const startup = await Startup.findOne({ email }).session(session);
+        if (!startup.notifications) {
+            startup.notifications = [];
+            startup.notifications.push(startupNotificationObject);
+        } else {
+            const alreadyExist = startup.notifications.find(
+                (request) =>
+                    request.remoforceEmail === startupNotificationObject.remoforceEmail &&
+                    request.jobId === startupNotificationObject.jobId &&
+                    request.type === startupNotificationObject.type &&
+                    request.stage === startupNotificationObject.stage
+            );
+            if (!alreadyExist) {
+                startup.notifications.push(startupNotificationObject);
+            }
+        }
+        await startup.save({ session });
         await session.commitTransaction();
         res.send('Application request inserted successfully');
     } catch (error) {
@@ -646,8 +680,30 @@ const insertApplication = async (req, res) => {
 // accept application
 // delete a job of user
 const rejectApplication = async (req, res) => {
-    const { email, jobId, applicantsEmail } = req.body;
+    const {
+        email,
+        jobId,
+        applicantsEmail,
+        remoforceName,
+        startupsName,
+        jobTitle,
+        type,
+        stage,
+        notificationStatus,
+    } = req.body;
     const status = 'rejected';
+
+    const remoforceNotificationObject = {
+        jobId,
+        startupsEmail: email,
+        startupName: startupsName,
+        remoforceName,
+        remoforceEmail: applicantsEmail,
+        jobTitle,
+        type,
+        stage,
+        status: notificationStatus,
+    };
 
     try {
         // Find the job post by ID
@@ -687,6 +743,22 @@ const rejectApplication = async (req, res) => {
         );
 
         applicationToUpdate.applicationStatus = status;
+
+        if (!remoforce.notifications) {
+            remoforce.notifications = [];
+            remoforce.notifications.push(remoforceNotificationObject);
+        } else {
+            const alreadyExist = remoforce.notifications.find(
+                (request) =>
+                    request.remoforceEmail === remoforceNotificationObject.remoforceEmail &&
+                    request.jobId === remoforceNotificationObject.jobId &&
+                    request.type === remoforceNotificationObject.type &&
+                    request.stage === remoforceNotificationObject.stage
+            );
+            if (!alreadyExist) {
+                remoforce.notifications.push(remoforceNotificationObject);
+            }
+        }
         await remoforce.save();
 
         res.send('Application request rejected');
@@ -697,8 +769,30 @@ const rejectApplication = async (req, res) => {
 };
 const acceptApplication = async (req, res) => {
     const { id } = req.params;
-    const { email, jobId, applicantsEmail,status } = req.body;
-    console.log('-------------', id, jobId);
+    const {
+        email,
+        jobId,
+        applicantsEmail,
+        status,
+        remoforceName,
+        startupsName,
+        jobTitle,
+        type,
+        stage,
+        notificationStatus,
+    } = req.body;
+
+    const remoforceNotificationObject = {
+        jobId,
+        startupsEmail: email,
+        startupName: startupsName,
+        remoforceName,
+        remoforceEmail: applicantsEmail,
+        jobTitle,
+        type,
+        stage,
+        status: notificationStatus,
+    };
 
     try {
         // Find the job post by ID
@@ -706,7 +800,7 @@ const acceptApplication = async (req, res) => {
         if (!jobPost) {
             return res.status(404).send('Job post not found');
         }
-
+        console.log({ jobPost });
         // Update the application request's status to "accepted"
         const applicationRequestIndex = jobPost.applicationRequest.findIndex(
             (request) => request.applicantsEmail === applicantsEmail
@@ -715,6 +809,8 @@ const acceptApplication = async (req, res) => {
             return res.status(404).send('Application request not found');
         }
         jobPost.applicationRequest[applicationRequestIndex].applicationStatus = status;
+
+      
 
         await jobPost.save();
 
@@ -738,8 +834,25 @@ const acceptApplication = async (req, res) => {
         );
 
         applicationToUpdate.applicationStatus = status;
-        await remoforce.save();
 
+        // updating notification
+
+        if (!remoforce.notifications) {
+            remoforce.notifications = [];
+            remoforce.notifications.push(remoforceNotificationObject);
+        } else {
+            const alreadyExist = remoforce.notifications.find(
+                (request) =>
+                    request.remoforceEmail === remoforceNotificationObject.remoforceEmail &&
+                    request.jobId === remoforceNotificationObject.jobId &&
+                    request.type === remoforceNotificationObject.type &&
+                    request.stage === remoforceNotificationObject.stage
+            );
+            if (!alreadyExist) {
+                remoforce.notifications.push(remoforceNotificationObject);
+            }
+        }
+        await remoforce.save();
         res.send('Application request updated');
     } catch (error) {
         console.error(error);
@@ -756,16 +869,14 @@ const getStatus = async (req, res) => {
 
         const remoforce = await Remoforce.findOne({ email });
         const country = remoforce?.personalDetails?.country || 'Not Provided';
-        const job = await JobDataModel.findById(
-             jobId,
-        ).exec();
+        const job = await JobDataModel.findById(jobId).exec();
 
         if (!job) {
             // If the job is not found, return an error response
             return res.status(404).json({ error: 'Job not found' });
         }
         if (job.applicationRequest.length === 0) {
-            return res.send({ status: 'notApplied', country ,jobDetails:job });
+            return res.send({ status: 'notApplied', country, jobDetails: job });
         }
 
         // Get the application request for the current user (based on their email)
@@ -777,11 +888,11 @@ const getStatus = async (req, res) => {
 
         if (!applicationRequest) {
             // If there is no application request for the current user, return an error response
-            return res.send({ status: 'notApplied', country ,jobDetails:job });
+            return res.send({ status: 'notApplied', country, jobDetails: job });
         }
 
         // Return the application status for the current user
-        return res.json({ status: applicationRequest.applicationStatus, country,jobDetails:job });
+        return res.json({ status: applicationRequest.applicationStatus, country, jobDetails: job });
     } catch (error) {
         // If there is an error while querying the database, return a generic error response
         console.error(error);
@@ -810,10 +921,34 @@ const applicationRequests = async (req, res) => {
     }
 };
 const createInterviewSchedule = async (req, res) => {
-    const { applicantsEmail, jobId, startupsEmail, interviewStatus, scheduleDetails } = req.body;
+    const {
+        applicantsEmail,
+        jobId,
+        startupsEmail,
+        interviewStatus,
+        scheduleDetails,
+        startupsName,
+        applicantsName,
+        jobTitle,
+        type,
+        stage,
+        status,
+    } = req.body;
+
+    const remoforceNotificationObject = {
+        jobId,
+        startupsEmail,
+        startupName: startupsName,
+        remoforceName: applicantsName,
+        remoforceEmail: applicantsEmail,
+        jobTitle,
+        type,
+        stage,
+        status,
+    };
 
     // res.send('route ok')
-console.log(jobId.yellow.bold);
+    console.log(jobId.yellow.bold);
 
     try {
         // Find the job post by ID
@@ -836,7 +971,7 @@ console.log(jobId.yellow.bold);
         const jobsToUpdate = userJobPosts.jobs.find((post) => post.jobId === jobId);
         jobsToUpdate.interviewSchedule = scheduleDetails;
         jobsToUpdate.applicationStatus = interviewStatus;
-        
+
         await userJobPosts.save();
 
         // Update the remoforce all application posts as well
@@ -848,6 +983,22 @@ console.log(jobId.yellow.bold);
         console.log(remoforce);
         applicationToUpdate.interviewSchedule = scheduleDetails;
         applicationToUpdate.applicationStatus = interviewStatus;
+
+        if (!remoforce.notifications) {
+            remoforce.notifications = [];
+            remoforce.notifications.push(remoforceNotificationObject);
+        } else {
+            const alreadyExist = remoforce.notifications.find(
+                (request) =>
+                    request.remoforceEmail === remoforceNotificationObject.remoforceEmail &&
+                    request.jobId === remoforceNotificationObject.jobId &&
+                    request.type === remoforceNotificationObject.type &&
+                    request.stage === remoforceNotificationObject.stage
+            );
+            if (!alreadyExist) {
+                remoforce.notifications.push(remoforceNotificationObject);
+            }
+        }
         await remoforce.save();
 
         res.status(200).send('successful');
@@ -877,6 +1028,6 @@ module.exports = {
     editContractsJob,
     applicationRequests,
     createInterviewSchedule,
-    allAppliedJobs
+    allAppliedJobs,
 };
 // module.exports = { getCategories, publicJob, privateJob, internship, contracts };

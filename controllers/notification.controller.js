@@ -24,18 +24,18 @@ const getStartupNotifications = async (req, res) => {
     }
 };
 const remoMakeRead = async (req, res) => {
-    const { email, jobId, status } = req.body;
+    const { email, jobId, status,stage } = req.body;
 
     try {
-        //     const remoforce = await Remoforce.findOne({ email });
+            const remoforce = await Remoforce.findOne({ email });
 
-        //    const notificationToUpdate= remoforce.notifications.find(job => job.jobId===jobId);
-        //    notificationToUpdate.status=status;
-        //    await remoforce.save();
-        const remoforce = await Remoforce.findOneAndUpdate(
-            { email, 'notifications.jobId': jobId },
-            { $set: { 'notifications.$.status': status } }
-        );
+           const notificationToUpdate= remoforce.notifications.find(job => job.jobId===jobId && job.stage===stage);
+           notificationToUpdate.status=status;
+           await remoforce.save();
+        // const remoforce = await Remoforce.findOneAndUpdate(
+        //     { email, 'notifications.jobId': jobId, 'notifications.stage': stage },
+        //     { $set: { 'notifications.$.status': status } }
+        // );
 
         if (remoforce) {
             res.send('made read');
@@ -47,18 +47,19 @@ const remoMakeRead = async (req, res) => {
     }
 };
 const startupMakeRead = async (req, res) => {
-    const { email, jobId, status } = req.body;
+    const { email, jobId, status,stage } = req.body;
+
+    console.log(req.body)
 
     try {
-        //     const remoforce = await Remoforce.findOne({ email });
+            const startup = await Startup.findOne({ email });
 
-        //    const notificationToUpdate= remoforce.notifications.find(job => job.jobId===jobId);
-        //    notificationToUpdate.status=status;
-        //    await remoforce.save();
-        const startup= await Startup.findOneAndUpdate(
-            { email, 'notifications.jobId': jobId },
-            { $set: { 'notifications.$.status': status } }
-        );
+           const notificationToUpdate= startup.notifications.find(job => job.jobId===jobId && job.stage===stage);
+           notificationToUpdate.status=status;
+           await startup.save();
+        
+
+      
 
         if (startup) {
             res.send('made read');
