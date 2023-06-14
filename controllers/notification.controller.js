@@ -12,6 +12,21 @@ const getRemoforceNotifications = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const realRemoforceNotifications = async (email) => {
+    
+
+    try {
+        const remoforce = await Remoforce.findOne({ email });
+
+        return remoforce.notifications;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
+
+
+
+
 const getStartupNotifications = async (req, res) => {
     const { email } = req.params;
 
@@ -23,6 +38,9 @@ const getStartupNotifications = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+
+
+
 const remoMakeRead = async (req, res) => {
     const { email, jobId, status,stage } = req.body;
 
@@ -71,4 +89,4 @@ const startupMakeRead = async (req, res) => {
     }
 };
 
-module.exports = { getRemoforceNotifications, remoMakeRead, getStartupNotifications,startupMakeRead };
+module.exports = {realRemoforceNotifications, getRemoforceNotifications, remoMakeRead, getStartupNotifications,startupMakeRead };

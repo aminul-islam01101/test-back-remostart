@@ -668,7 +668,11 @@ const insertApplication = async (req, res) => {
         }
         await startup.save({ session });
         await session.commitTransaction();
-        res.send('Application request inserted successfully');
+        res.status(200).send({
+          message: 'Application request inserted successfully',
+          data:  startup.notifications
+        });
+        
     } catch (error) {
         await session.abortTransaction();
         console.error(error);
@@ -761,7 +765,10 @@ const rejectApplication = async (req, res) => {
         }
         await remoforce.save();
 
-        res.send('Application request rejected');
+        res.status(200).send({
+            message: 'Application request rejected',
+            data:  remoforce.notifications
+          });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -853,7 +860,10 @@ const acceptApplication = async (req, res) => {
             }
         }
         await remoforce.save();
-        res.send('Application request updated');
+        res.status(200).send({
+            message: `${status==='accepted' ? 'Application accepted successfully' : 'Application Application request accepted '}`,
+            data:  remoforce.notifications
+          });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -1001,7 +1011,10 @@ const createInterviewSchedule = async (req, res) => {
         }
         await remoforce.save();
 
-        res.status(200).send('successful');
+        res.status(200).send({
+            message: 'Event creation successful.Pls check your calender',
+            data:  remoforce.notifications
+          });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');

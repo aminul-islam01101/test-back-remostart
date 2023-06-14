@@ -363,16 +363,16 @@ const interviewRequests = async (req, res) => {
                 remoforceEmail: remo.email,
                 remoforceName: remo.fullName,
             };
-            console.log({ remoObject });
+           
             const remoNotificationObject = {
                 jobId: requestBody.searchId,
                 startupsEmail: requestBody.startupsEmail,
                 startupName: requestBody.startupName,
                 remoforceEmail: remo.email,
                 jobTitle: requestBody.searchQuery.details.title,
-                type: 'talent-request',
-                stage: 'talent-request',
-                status: 'unread',
+                type: requestBody.type,
+                stage: requestBody.stage,
+                status: requestBody.status,
                 remoforceName: remo.fullName,
             };
 
@@ -409,7 +409,10 @@ const interviewRequests = async (req, res) => {
         await Promise.all(promises);
 
         const result = await startup.save();
-        res.status(200).json({ message: 'Startup saved successfully' });
+        res.status(200).send({
+            message: 'Event creation successful.Pls check your calender',
+            
+          });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -520,7 +523,10 @@ const remoforceRequestAcceptance = async (req, res) => {
         }
         
         await startup.save();
-        res.status(200).json({ message: 'schedule booked' });
+        res.status(200).send({
+            message: 'Interview slot booking successful',
+            data:  startup.notifications
+          });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -632,7 +638,10 @@ const remoforceRequestRejection = async (req, res) => {
         }
         
         await startup.save();
-        res.status(200).json({ message: 'talent request rejection successful' });
+        res.status(200).send({
+            message: 'Interview slot booking successful',
+            data:  startup.notifications
+          });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');

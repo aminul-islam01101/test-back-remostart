@@ -1,21 +1,12 @@
-require('dotenv').config();
+const ios = require('socket.io');
 const colors = require('colors');
 const http = require('http');
-const mongoose = require('mongoose');
 const app = require('./app');
 const { connectDataBase } = require('./configs/db');
+const { realRemoforceNotifications } = require('./controllers/notification.controller');
+const { startSocketServer } = require('./configs/socket');
 
-const mongoDB = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.dtbllhc.mongodb.net/Remo?retryWrites=true&w=majority`;
-
-const port = process.env.PORT;
-
-// mongoose.connect(mongoDB, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-// }).then(() => {
-//     console.log('Database connected');
-
-// })
+require('dotenv').config();
 
 colors.setTheme({
     info: 'green',
@@ -23,26 +14,20 @@ colors.setTheme({
     warn: 'yellow',
     error: 'red',
 });
-// const server = http.createServer(app);
+const port = process.env.PORT;
 
-// connectDataBase().then(() => {
-//     server.listen(port, () => {
-//         console.log('Server running on port'.warn.italic, port);
-//     });
-// });
-
-// app.listen(port, () => {
-//   console.log(`App is running on port ${port}`.yellow.bold);
-// });
 async function startServer() {
     try {
         await connectDataBase();
 
-        app.listen(port, () => {
-            console.log(`App is running on port ${port}`.yellow.bold);
+        const server = http.createServer(app);
+        startSocketServer(server);
+
+        server.listen(port, () => {
+            console.log(`App is running on port ${port}`);
         });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         process.exit(1);
     }
 }
