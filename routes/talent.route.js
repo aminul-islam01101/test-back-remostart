@@ -8,7 +8,9 @@ const {
     getAvailableSlots,
     createdEvents,
     getStartupsDetail,
-    remoforceRequestRejection
+    remoforceRequestRejection,
+    createPayments 
+
 } = require('../controllers/talent.controller');
 
 const router = express.Router();
@@ -22,5 +24,7 @@ router.put('/remo-request-rejection', remoforceRequestRejection);
 router.get('/available-slots', getAvailableSlots);
 router.get('/created-events', createdEvents);
 router.get('/get-startup', getStartupsDetail);
+router.post('/payment-details', createPayments );
+
 
 module.exports = router;

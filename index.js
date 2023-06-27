@@ -1,10 +1,9 @@
-const ios = require('socket.io');
+
 const colors = require('colors');
-const http = require('http');
+
 const app = require('./app');
 const { connectDataBase } = require('./configs/db');
-const { realRemoforceNotifications } = require('./controllers/notification.controller');
-const { startSocketServer } = require('./configs/socket');
+
 
 require('dotenv').config();
 
@@ -20,14 +19,13 @@ async function startServer() {
     try {
         await connectDataBase();
 
-        const server = http.createServer(app);
-        startSocketServer(server);
+     
 
-        server.listen(port, () => {
-            console.log(`App is running on port ${port}`);
+        app.listen(port, () => {
+            console.log(`App is running on port ${port}`.yellow.bold);
         });
     } catch (err) {
-        console.error(err);
+        console.log(err);
         process.exit(1);
     }
 }

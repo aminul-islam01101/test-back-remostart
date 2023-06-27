@@ -21,6 +21,7 @@ const register = async (req, res) => {
         linkedIn,
         officePhone,
         companyEmail,
+        talentRequestPaymentDetails
     } = req.body;
 
     try {
@@ -44,6 +45,7 @@ const register = async (req, res) => {
                     companyEmail,
                     linkedIn,
                     officePhone,
+                    talentRequestPaymentDetails
                 });
 
                 await newStartup

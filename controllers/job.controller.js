@@ -454,10 +454,16 @@ const getUsersActiveJobs = async (req, res) => {
 
     try {
         const user = await UserJobsModel.findOne({ email });
-        const activeJobs = user.jobs.filter((job) => job.jobStatus === jobStatus);
+        if (user?.jobs?.length) {
+            const activeJobs = user?.jobs?.filter((job) => job.jobStatus === jobStatus);
+            res.status(200).json(activeJobs);
+            return;
+        }
+
+        const activeJobs = [];
+        res.status(200).json(activeJobs);
 
         // res.send('route ok')
-        res.status(200).json(activeJobs);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -471,10 +477,16 @@ const getUsersShadowingJobs = async (req, res) => {
 
     try {
         const user = await UserJobsModel.findOne({ email });
-        const shadowingJobs = user.jobs.filter((job) => job.categoryName === categoryName);
+        if (user?.jobs?.length) {
+            const shadowingJobs = user.jobs.filter((job) => job.categoryName === categoryName);
+            res.status(200).json(shadowingJobs);
+            return;
+        }
+
+        const shadowingJobs = [];
+        res.status(200).json(shadowingJobs);
 
         // res.send('route ok')
-        res.status(200).json(shadowingJobs);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -669,10 +681,9 @@ const insertApplication = async (req, res) => {
         await startup.save({ session });
         await session.commitTransaction();
         res.status(200).send({
-          message: 'Application request inserted successfully',
-          data:  startup.notifications
+            message: 'Application request inserted successfully',
+            data: startup.notifications,
         });
-        
     } catch (error) {
         await session.abortTransaction();
         console.error(error);
@@ -767,8 +778,8 @@ const rejectApplication = async (req, res) => {
 
         res.status(200).send({
             message: 'Application request rejected',
-            data:  remoforce.notifications
-          });
+            data: remoforce.notifications,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -817,8 +828,6 @@ const acceptApplication = async (req, res) => {
         }
         jobPost.applicationRequest[applicationRequestIndex].applicationStatus = status;
 
-      
-
         await jobPost.save();
 
         // Update the user's job posts as well
@@ -861,9 +870,13 @@ const acceptApplication = async (req, res) => {
         }
         await remoforce.save();
         res.status(200).send({
-            message: `${status==='accepted' ? 'Application accepted successfully' : 'Application Application request accepted '}`,
-            data:  remoforce.notifications
-          });
+            message: `${
+                status === 'accepted'
+                    ? 'Application accepted successfully'
+                    : 'Application Application request accepted '
+            }`,
+            data: remoforce.notifications,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -1013,8 +1026,8 @@ const createInterviewSchedule = async (req, res) => {
 
         res.status(200).send({
             message: 'Event creation successful.Pls check your calender',
-            data:  remoforce.notifications
-          });
+            data: remoforce.notifications,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');

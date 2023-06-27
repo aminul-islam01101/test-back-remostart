@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const allValidator = require('validator');
 const { notificationSchema } = require('./jobs-Models/job.schema');
 
+const { ObjectId } = mongoose.Types;
+
 const talentsDataSchema = new mongoose.Schema({
     fullName: String,
     email: String,
@@ -13,7 +15,7 @@ const talentsDataSchema = new mongoose.Schema({
         type: String,
         enum: ['not requested', 'requested', 'accepted', 'rejected'],
     },
-    interviewSchedule:{}
+    interviewSchedule: {},
 });
 // const eventSchema =new mongoose.Schema()
 const individualHistorySchema = new mongoose.Schema({
@@ -33,29 +35,32 @@ const individualHistorySchema = new mongoose.Schema({
         ],
         requiredTalents: Number,
     },
-    events:[],
+    events: [],
     requiredTalentsInHistory: [talentsDataSchema],
     timestamp: {
         type: Date,
         default: Date.now, // Add a default value of the current date and time
-      },
+    },
 });
 const talentHistorySchema = new mongoose.Schema({
     transactionId: String,
     searchHistory: [individualHistorySchema],
-   
 });
 
 const talentRequestHistorySchema = new mongoose.Schema({
-    tierFree: {
+    tierFREE: {
         type: [talentHistorySchema],
         default: [],
     },
-    tier10: {
+    tierSTARTER: {
         type: [talentHistorySchema],
         default: [],
     },
-    tier15: {
+    tierTEAM: {
+        type: [talentHistorySchema],
+        default: [],
+    },
+    tierBUSINESS: {
         type: [talentHistorySchema],
         default: [],
     },
@@ -289,14 +294,16 @@ const startupUserSchema = new mongoose.Schema({
         },
     },
     talentRequestPaymentDetails: {
+        id: ObjectId,
         tier: { type: String },
-        transactionId: { type: [String, null] },
+        transactionId: { type: String },
+        searchLimit: { type: Number },
     },
-    calenderTokens:{
+    calenderTokens: {
         accessToken: { type: String },
         refreshToken: { type: String },
     },
-    notifications:[notificationSchema],
+    notifications: [notificationSchema],
     //
     // createdAt: {
     //     type: Date,

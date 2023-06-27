@@ -2,9 +2,22 @@
 const mongoose = require('mongoose');
 const Remoforce = require('../models/remoForce.schema');
 const Startup = require('../models/startup.schema');
+const Payment = require('../models/payment.scheema');
 
 const getMatchedTalents = async (req, res) => {
     const queryData = req.body;
+
+    // queryData: {
+    //     email: 'cigemig458@v2ssr.com',
+    //     tier: 'Free',
+    //     transactionId: null,
+    //     selectedSkills: [ [Object] ],
+    //     locationPreference: [ 'Remote' ],
+    //     selectedLanguages: [ 'English' ],
+    //     softSkills: [ 'Adaptability', 'Active listening' ],
+    //     requiredTalents: '6',
+    //     details: { title: 'paypal developer', description: 'asdfasfsdfsfsfsfsfsdf' }
+    //   }
 
     try {
         const docs = await Remoforce.find({
@@ -89,6 +102,8 @@ const getMatchedTalents = async (req, res) => {
         results.sort((a, b) => b.scorePercentage - a.scorePercentage);
         let sortedTalent = [];
         if (results.length) {
+            // todo: score percentage should be updated (now its floor is only 10 to match more talent, it should be updated to 50 as least)
+            // const talentScoreFilter = results.filter((talent) => talent.scorePercentage >= 10);
             const talentScoreFilter = results.filter((talent) => talent.scorePercentage >= 10);
             if (talentScoreFilter.length >= queryData.requiredTalents) {
                 sortedTalent = talentScoreFilter.slice(0, queryData.requiredTalents);
@@ -129,13 +144,22 @@ const getMatchedTalents = async (req, res) => {
 
         // startupUser.talentRequestHistory[tier].transactionId=queryData.transactionId;
         // startupUser.talentRequestHistory[tier].searchHistory.push('something');
-        const tier = `tier${queryData.tier}`;
-        const maxSearchLimit = {
-            tierFree: 2,
-            tier10: 15,
-            tier15: 20,
-        };
+        const talentRequestPaymentDetails = startupUser?.talentRequestPaymentDetails;
+        const tier = talentRequestPaymentDetails?.tier;
+        const transactionId = talentRequestPaymentDetails?.transactionId;
 
+        const maxSearchLimit = {
+            tierFREE: 1000,
+            tierSTARTER: 7,
+            tierTEAM: 50,
+            tierBUSINESS: 100,
+        };
+        // const maxSearchLimit = {
+        //     tierFree: 1000,
+        //     tier10: 7,
+        //     tier29: 50,
+        //     tier39: 20,
+        // };
         if (!startupUser.talentRequestHistory) {
             startupUser.talentRequestHistory = {};
         }
@@ -147,14 +171,24 @@ const getMatchedTalents = async (req, res) => {
         const tierHistory = startupUser.talentRequestHistory[tier];
 
         const matchedTransactionIndex = tierHistory.findIndex(
-            (history) => history.transactionId === queryData.transactionId
+            (history) => history.transactionId === transactionId
         );
 
+        if (matchedTransactionIndex >= 0) {
+            const history = tierHistory[matchedTransactionIndex];
+            if (history.searchHistory.length < maxSearchLimit[tier]) {
+                history.searchHistory.push(talentHistory);
+            }
+        } else {
+            const newTransactionHistory = {
+                transactionId,
+                searchHistory: [talentHistory],
+            };
+            tierHistory.push(newTransactionHistory);
+        }
+
         // if (matchedTransactionIndex >= 0) {
-        //     const history = tierHistory[matchedTransactionIndex];
-        //     if (history.searchHistory.length < maxSearchLimit[tier]) {
-        //         history.searchHistory.push(talentHistory);
-        //     }
+        //     tierHistory[matchedTransactionIndex].searchHistory.push(talentHistory);
         // } else {
         //     const newTransactionHistory = {
         //         transactionId: queryData.transactionId,
@@ -162,16 +196,6 @@ const getMatchedTalents = async (req, res) => {
         //     };
         //     tierHistory.push(newTransactionHistory);
         // }
-
-        if (matchedTransactionIndex >= 0) {
-            tierHistory[matchedTransactionIndex].searchHistory.push(talentHistory);
-        } else {
-            const newTransactionHistory = {
-                transactionId: queryData.transactionId,
-                searchHistory: [talentHistory],
-            };
-            tierHistory.push(newTransactionHistory);
-        }
         await startupUser.save();
         const startupsRequiredTalentsInHistory = {
             startupsEmail: queryData.email,
@@ -185,16 +209,39 @@ const getMatchedTalents = async (req, res) => {
     }
 };
 const getMatchedLastResults = async (req, res) => {
-    const { email, tier } = req.query;
+    const { email } = req.query;
 
-    console.log(email, tier);
     // res.send('route ok')
 
     try {
         // Find the job post by ID
+
+        let lastSearchResult = {};
+        let startupsLastSearchResults = { startupsEmail: email, lastSearchResult };
         const startup = await Startup.findOne({ email });
-        if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
-            const lastSearchResult =
+        if (!startup) {
+            throw new Error('No startup found');
+        }
+
+        const talentRequestPaymentDetails = startup?.talentRequestPaymentDetails;
+        const tier = talentRequestPaymentDetails?.tier;
+        const transactionId = talentRequestPaymentDetails?.transactionId;
+
+        if (!startup.talentRequestHistory[tier].length) {
+            res.send(startupsLastSearchResults);
+            return;
+        }
+        //! check again
+        if (startup?.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
+            const isValidTransactionId = startup?.talentRequestHistory[tier].find(
+                (eachTransaction) => eachTransaction.transactionId === transactionId
+            );
+            if (!isValidTransactionId) {
+                res.send(startupsLastSearchResults);
+                return;
+            }
+
+            lastSearchResult =
                 startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
                     ?.searchHistory[
                     startup.talentRequestHistory[tier][
@@ -202,11 +249,9 @@ const getMatchedLastResults = async (req, res) => {
                     ].searchHistory.length - 1
                 ];
 
-            const startupsLastSearchResults = { startupsEmail: email, lastSearchResult };
+            startupsLastSearchResults = { startupsEmail: email, lastSearchResult };
             res.send(startupsLastSearchResults);
         } else {
-            const lastSearchResult = {};
-            const startupsLastSearchResults = { startupsEmail: email, lastSearchResult };
             res.send(startupsLastSearchResults);
         }
     } catch (error) {
@@ -216,26 +261,58 @@ const getMatchedLastResults = async (req, res) => {
 };
 // my requests
 const getMyRequests = async (req, res) => {
-    const { email, tier } = req.query;
+    const { email } = req.query;
 
-    console.log(email, tier);
     // res.send('route ok')
 
     try {
         // Find the job post by ID
         const startup = await Startup.findOne({ email });
-        // console.log('--------', startup.talentRequestHistory);
+
+        console.log(startup.talentRequestHistory);
+        const { _id, ...talentRequestHistory } = startup.talentRequestHistory.toObject();
+
+        const myRequests = {};
+        const requests = Object.values(talentRequestHistory)
+            .flatMap((tier) => tier.map((item) => item.searchHistory))
+            .flat();
+
+        if (requests.length) {
+            myRequests.searchHistory = requests;
+        } else {
+            myRequests.searchHistory = [];
+        }
+
+        //   console.log(searchHistoryArray);
+
+        // console.log(searchHistoryArray);
+
+        const talentRequestPaymentDetails = startup?.talentRequestPaymentDetails;
+        const tier = talentRequestPaymentDetails?.tier;
+        const transactionId = talentRequestPaymentDetails?.transactionId;
+        console.log(tier, transactionId);
+        let totalMatch = 0;
+        let requestsInCurrentTier =[]
 
         if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
-            const myRequests =
-                startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1];
-
-            const totalMatch = startup.talentRequestHistory[tier][
-                startup.talentRequestHistory[tier].length - 1
-            ].searchHistory.reduce(
-                (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
-                0
+           
+           
+            const isValidTransactionId = startup?.talentRequestHistory[tier].find(
+                (eachTransaction) => eachTransaction.transactionId === transactionId
             );
+            if (isValidTransactionId) {
+                        
+           
+                totalMatch = startup.talentRequestHistory[tier][
+                    startup.talentRequestHistory[tier].length - 1
+                ].searchHistory.reduce(
+                    (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
+                    0
+                );
+                requestsInCurrentTier =
+                startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
+                    .searchHistory;
+            }
 
             // const totalMatch = startup.talentRequestHistory[tier].reduce(
             //     (acc, talentHistory) => acc + talentHistory.requiredTalentsInHistory.length,
@@ -245,6 +322,7 @@ const getMyRequests = async (req, res) => {
             const myRequestData = {
                 totalMatch,
                 myRequests,
+                requestsInCurrentTier,
             };
 
             // Update the application request's status to "accepted"
@@ -252,11 +330,12 @@ const getMyRequests = async (req, res) => {
             // res.send(job.applicationRequest);
             res.send(myRequestData);
         } else {
-            const totalMatch = 0;
-            const myRequests = {};
+           
+            
             const myRequestData = {
                 totalMatch,
                 myRequests,
+                requestsInCurrentTier,
             };
 
             res.send(myRequestData);
@@ -303,9 +382,12 @@ const interviewRequests = async (req, res) => {
     try {
         // Find startup user
         const startup = await Startup.findOne({ email: requestBody.startupsEmail });
+        const talentRequestPaymentDetails = startup?.talentRequestPaymentDetails;
+        const tier = talentRequestPaymentDetails?.tier;
+        const transactionId = talentRequestPaymentDetails?.transactionId;
 
-        const eventsProp = startup.talentRequestHistory[requestBody.tier]
-            .find((searchHistory) => searchHistory.transactionId === requestBody.transactionId)
+        const eventsProp = startup.talentRequestHistory[tier]
+            .find((searchHistory) => searchHistory.transactionId === transactionId)
             .searchHistory.find(
                 (search) =>
                     search._id.toString() ===
@@ -323,8 +405,8 @@ const interviewRequests = async (req, res) => {
             });
         }
 
-        startup.talentRequestHistory[requestBody.tier]
-            .find((searchHistory) => searchHistory.transactionId === requestBody.transactionId)
+        startup.talentRequestHistory[tier]
+            .find((searchHistory) => searchHistory.transactionId === transactionId)
             .searchHistory.find(
                 (search) =>
                     search._id.toString() ===
@@ -335,8 +417,8 @@ const interviewRequests = async (req, res) => {
                     talent.interviewStatus = requestBody.interviewStatus;
                 }
             });
-        startup.talentRequestHistory[requestBody.tier]
-            .find((searchHistory) => searchHistory.transactionId === requestBody.transactionId)
+        startup.talentRequestHistory[tier]
+            .find((searchHistory) => searchHistory.transactionId === transactionId)
             .searchHistory.find(
                 (search) =>
                     search._id.toString() ===
@@ -363,7 +445,7 @@ const interviewRequests = async (req, res) => {
                 remoforceEmail: remo.email,
                 remoforceName: remo.fullName,
             };
-           
+
             const remoNotificationObject = {
                 jobId: requestBody.searchId,
                 startupsEmail: requestBody.startupsEmail,
@@ -411,8 +493,7 @@ const interviewRequests = async (req, res) => {
         const result = await startup.save();
         res.status(200).send({
             message: 'Event creation successful.Pls check your calender',
-            
-          });
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -440,7 +521,8 @@ const remoforceRequestAcceptance = async (req, res) => {
         status,
         remoforceName,
     } = requestBody;
-    const startupNotificationObject={ jobId,
+    const startupNotificationObject = {
+        jobId,
         startupsEmail,
         startupName,
         remoforceEmail,
@@ -449,7 +531,7 @@ const remoforceRequestAcceptance = async (req, res) => {
         stage,
         status,
         remoforceName,
-    }
+    };
 
     // console.log({ requestBody });
 
@@ -497,7 +579,6 @@ const remoforceRequestAcceptance = async (req, res) => {
         );
         talentData.interviewStatus = requestBody.interviewStatus;
         talentData.interviewSchedule = requestBody.bookedSlot;
-      
 
         const remoforceRequest = remoforce.allRequests.find(
             (request) => request.jobId === requestBody.jobId
@@ -521,12 +602,12 @@ const remoforceRequestAcceptance = async (req, res) => {
                 startup.notifications.push(startupNotificationObject);
             }
         }
-        
+
         await startup.save();
         res.status(200).send({
             message: 'Interview slot booking successful',
-            data:  startup.notifications
-          });
+            data: startup.notifications,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -551,9 +632,10 @@ const remoforceRequestRejection = async (req, res) => {
         stage,
         status,
         remoforceName,
-        interviewStatus
+        interviewStatus,
     } = requestBody;
-    const startupNotificationObject={ jobId,
+    const startupNotificationObject = {
+        jobId,
         startupsEmail,
         startupName,
         remoforceEmail,
@@ -562,7 +644,7 @@ const remoforceRequestRejection = async (req, res) => {
         stage,
         status,
         remoforceName,
-    }
+    };
 
     // console.log({ requestBody });
 
@@ -598,28 +680,21 @@ const remoforceRequestRejection = async (req, res) => {
 
         const searchHistory = getSearchHistoryById(jobId);
 
-        console.log({searchHistory})
+        console.log({ searchHistory });
 
-        const rejectedRequest= searchHistory.requiredTalentsInHistory
-        .find(
-            (talent) => talent.
-            email === remoforceEmail
+        const rejectedRequest = searchHistory.requiredTalentsInHistory.find(
+            (talent) => talent.email === remoforceEmail
         );
-
-       
 
         rejectedRequest.interviewStatus = interviewStatus;
         await Remoforce.updateOne(
             { email: remoforceEmail },
-            { $pull: { notifications
-                : {  jobId } } }
-          );
-       
+            { $pull: { notifications: { jobId } } }
+        );
+
         remoforce.allRequests.pull({ jobId });
         await remoforce.save();
-            await remoforce.save();
-
-      
+        await remoforce.save();
 
         if (!startup.notifications) {
             startup.notifications = [];
@@ -636,12 +711,12 @@ const remoforceRequestRejection = async (req, res) => {
                 startup.notifications.push(startupNotificationObject);
             }
         }
-        
+
         await startup.save();
         res.status(200).send({
             message: 'Interview slot booking successful',
-            data:  startup.notifications
-          });
+            data: startup.notifications,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
@@ -725,10 +800,44 @@ const getStartupsDetail = async (req, res) => {
     const { email } = req.query;
 
     try {
-        const startup = await Startup.findOne({ email });
+        const startup = await Startup.findOne(
+            { email },
+            { startupName: 1, startupIcon: 1, talentRequestPaymentDetails: 1 }
+        );
 
         res.send(startup);
     } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+const createPayments = async (req, res) => {
+    const { startupEmail, tier, transactionId, searchLimit } = req.body;
+
+    const talentRequestPaymentDetails = { tier, transactionId, searchLimit };
+
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction();
+        const [createPayment] = await Payment.create([req.body], { session });
+        if (!createPayment) {
+            throw new Error('Payment not created');
+        }
+        talentRequestPaymentDetails.id = createPayment._id;
+        const updatedStartup = await Startup.updateOne(
+            { email: startupEmail },
+            { talentRequestPaymentDetails },
+            { upsert: true, new: true, session, timestamps: false }
+        );
+        if (updatedStartup.modifiedCount === 0) {
+            throw new new Error('failed to update startup')();
+        }
+        await session.commitTransaction();
+        await session.endSession();
+        res.send(updatedStartup);
+    } catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
         res.status(500).send(error.message);
     }
 };
@@ -742,5 +851,6 @@ module.exports = {
     getAvailableSlots,
     createdEvents,
     getStartupsDetail,
-    remoforceRequestRejection
+    remoforceRequestRejection,
+    createPayments,
 };
