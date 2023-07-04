@@ -150,7 +150,7 @@ router.get(
         if (req.user.role === 'remoforce') {
             console.log('🚀 ~ file: google.route.js:143 ~ user:', req.user);
 
-            res.redirect(`${CLIENT_URL}/remoforce-dashboard`);
+            res.redirect(`${CLIENT_URL}/remoforce-dashboard/dashboard`);
             return;
         }
         if (req.user.role === 'startup') {
