@@ -129,17 +129,19 @@ router.get(
             email: req.user.email,
             id: req.user._id,
         };
-        // const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2d' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2d' });
         //   res.cookie('token', `Bearer ${token}`, );
         // res.cookie('userRole', req.user.role,);
-        //   res.cookie('token', `Bearer ${token}`, { secure:true, sameSite: 'none' });
-        // res.cookie('userRole', req.user.role, { secure:true,  sameSite: 'none' });
+          res.cookie('token', `Bearer ${token}`, { secure:true, sameSite: 'none', });
+        res.cookie('userRole', req.user.role, { secure:true,  sameSite: 'none', httpOnly: true,  });
 
         // if (req.user.role === 'startup') {
         //     res.redirect(`${CLIENT_URL}/dashboard`);
         //     return;
         // }
         if (req.user.role === 'remoforce') {
+            console.log("🚀 ~ file: google.route.js:143 ~ user:", req.user)
+            
             res.redirect(`${CLIENT_URL}/remoforce-dashboard`);
             return;
         }

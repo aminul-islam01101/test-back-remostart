@@ -57,7 +57,7 @@ passport.use(
 
                 await newRemoForce
                     .save()
-                    // .then((remoforce) => console.log(remoforce))
+                  
                     .then(async () => {
                         const newRemoForceUser = await RemoForce.findOne({ email });
 
@@ -76,7 +76,7 @@ passport.use(
                         return done(null, newUser);
                     });
             } catch (error) {
-                // console.log(err);
+               
                 done(error, null);
             }
         }
