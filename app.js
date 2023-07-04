@@ -79,10 +79,11 @@ app.use(
         }),
         cookie: {
             maxAge: 2419200000,
-            secure: true,
-            sameSite: 'none',
+            // production only
+            // secure: true
+            // sameSite: 'none',
         },
-        // cookie: { secure: true },
+      
     })
 );
 app.set('trust proxy', 1);
