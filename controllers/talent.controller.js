@@ -227,7 +227,7 @@ const getMatchedLastResults = async (req, res) => {
         const tier = talentRequestPaymentDetails?.tier;
         const transactionId = talentRequestPaymentDetails?.transactionId;
 
-        if (!startup.talentRequestHistory[tier].length) {
+        if (!startup.talentRequestHistory[tier]?.length) {
             res.send(startupsLastSearchResults);
             return;
         }

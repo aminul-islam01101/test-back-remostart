@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const { updateProfileSettings } = require('../controllers/startupSettings.controller');
 const {
     updateGeneralSettingsPersonal,
@@ -11,16 +12,27 @@ const {
 } = require('../controllers/startupSettings.controller');
 const upload = require('../middleware/fileUploads');
 
+// const multerErrorHandler = (err, req, res, next) => {
+//     if (err) {
+//         res.status(400).send({
+//             success: false,
+//             message: err.message,
+//         });
+//     } else {
+//         next();
+//     }
+// };
 const multerErrorHandler = (err, req, res, next) => {
-    if (err) {
-        res.status(400).send({
-            success: false,
-            message: err.message,
-        });
-    } else {
-        next();
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).send({ message: 'Image too large, you can upload files up to 1MB' });
+      }
+      // Handle other Multer errors if needed
+    } else if (err) {
+      return res.status(400).send({ message: err.message });
     }
-};
+    next();
+  };
 
 const router = express.Router();
 

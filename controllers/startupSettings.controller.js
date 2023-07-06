@@ -24,26 +24,26 @@ const removeFiles = (files) => {
 const updateProfileSettings = async (req, res) => {
     const obj = JSON.parse(req.body.obj);
     const { email } = obj;
-    const startupIcon = req.files.startupIcon[0];
-    const { homePageImages } = req.files;
+    // const startupIcon = req.files?.startupIcon[0];
+    const  homePageImages  = req.files?.homePageImages;
 
-    console.log(homePageImages);
+    // console.log(homePageImages);
     const uploadedFilesUrls = [];
 
     let profileUrl = '';
-    if (req.files.startupIcon.length) {
+    if (req.files?.startupIcon && req.files?.startupIcon?.length) {
         profileUrl = await backBlazeSingle(req.files.startupIcon[0]);
 
         obj.startupIcon = profileUrl;
     }
-    if (homePageImages?.length) {
+    if (homePageImages && homePageImages?.length) {
         for (const file of homePageImages) {
             const url = await backBlazeSingle(file);
             uploadedFilesUrls.push(url);
         }
+        obj.homePageImages = uploadedFilesUrls;
     }
     // removeFiles(req.files);
-    obj.homePageImages = uploadedFilesUrls;
 
     try {
         if (email) {

@@ -39,9 +39,10 @@ passport.use(
             callbackURL: process.env.GOOGLE_CALLBACK,
         },
         async (accessToken, refreshToken, profile, done) => {
+            console.log("🚀 ~ file: passport.google.js:42 ~ profile:", profile)
             // done(null, profile);
             const email = profile.emails[0].value;
-            console.log('email', email);
+          
 
             try {
                 // Check if user already exists in the database
