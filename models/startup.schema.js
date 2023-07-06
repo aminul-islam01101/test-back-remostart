@@ -119,7 +119,7 @@ const startupUserSchema = new mongoose.Schema({
 
     designation: {
         type: String,
-        required: true,
+        // required: true,
         maxLength: 50,
         minLength: 3,
     },

@@ -10,6 +10,7 @@ const googleRoute = require('./google.route');
 const linkedinRoute = require('./linkedin.route');
 const CalenderRoute = require('./calender.route');
 const NotificationRoute = require('./notification.route');
+const feedbackRoute = require('./feedback.route');
 
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.use('/auth', googleRoute);
 router.use('/auth', linkedinRoute);
 router.use('/calender', CalenderRoute);
 router.use('/api/notification', NotificationRoute);
+router.use('/api/feedback', feedbackRoute);
 
 
 

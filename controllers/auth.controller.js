@@ -16,12 +16,12 @@ const register = async (req, res) => {
         personalPhone,
         email,
         role,
-        designation,
-        companyId,
-        linkedIn,
-        officePhone,
+        // designation,
+        // companyId,
+        // linkedIn,
+        // officePhone,
         companyEmail,
-        talentRequestPaymentDetails
+        talentRequestPaymentDetails,
     } = req.body;
 
     try {
@@ -40,12 +40,12 @@ const register = async (req, res) => {
                     fullName: `${firstName} ${lastName}`,
                     email,
                     personalPhone,
-                    designation,
-                    companyId,
+                    // designation,
+                    // companyId,
                     companyEmail,
-                    linkedIn,
-                    officePhone,
-                    talentRequestPaymentDetails
+                    // linkedIn,
+                    // officePhone,
+                    talentRequestPaymentDetails,
                 });
 
                 await newStartup
@@ -151,7 +151,7 @@ const login = async (req, res) => {
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '2d',
+        expiresIn: '30d',
     });
 
     return res.send({
@@ -163,11 +163,34 @@ const login = async (req, res) => {
     });
 };
 
-const user = (req, res) =>
+const user = async (req, res) => {
+    const { email } = req.user;
+  
+    const userExist = await User.findOne(
+        { email },
+        { fullName: 1, email: 1, role: 1, profilePhoto: 1 }
+    );
+    console.log("🚀 ~ file: auth.controller.js:173 ~ user ~ userExist:", userExist)
+
+    if (!userExist) {
+        res.status(200).send({
+            success: false,
+            user: null,
+        });
+        return;
+    }
+
+    res.cookie('userRole', userExist.role, {
+        secure: true,
+        sameSite: 'none',
+        //  httpOnly: true
+    });
+
     res.status(200).send({
         success: true,
-        user: req.user,
+        user: userExist,
     });
+};
 
 module.exports = {
     register,

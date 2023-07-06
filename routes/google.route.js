@@ -57,11 +57,11 @@ const CLIENT_URL = process.env.CLIENT;
 // const CLIENT_URL = "http://localhost:3000";
 
 router.get('/login/success', async (req, res) => {
-    console.log(req.user);
+    // console.log(req.user);
 
     if (req.user) {
         const { email } = req.user;
-        console.log(req.user);
+        // console.log(req.user);
 
         const userExist = await User.findOne({ email });
         const payload = {
@@ -123,19 +123,26 @@ router.get(
     passport.authenticate('google', {
         // successRedirect: CLIENT_URL,
         failureRedirect: '/login/failed',
+        // session: false,
     }),
     (req, res) => {
         const payload = {
             email: req.user.email,
             id: req.user._id,
         };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2d' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
+        const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '365d' });
         //   res.cookie('token', `Bearer ${token}`, );
         // res.cookie('userRole', req.user.role,);
         res.cookie('token', `Bearer ${token}`, {
             secure: true,
-            sameSite: 'none',
+            // sameSite: 'none',
             //  httpOnly: true
+        });
+        res.cookie('refreshToken', `Bearer ${refreshToken}`, {
+            secure: true,
+            sameSite: 'none',
+            httpOnly: true
         });
         res.cookie('userRole', req.user.role, {
             secure: true,
