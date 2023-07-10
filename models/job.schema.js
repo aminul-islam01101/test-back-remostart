@@ -128,6 +128,10 @@ const jobPostData = mongoose.Schema({
     },
     mentorsInfo: { mentorsBio: String, mentorsName: String, mentorsLinkedInURL: String },
     applicationRequest: [applicationRequestSchema],
+    timestamp: {
+        type: Date,
+        default: Date.now,
+    },
 });
 // this is for userJobs Collection and category collection
 const jobPostSchema = mongoose.Schema({

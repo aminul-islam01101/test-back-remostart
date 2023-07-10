@@ -5,7 +5,7 @@ const backBlazeSingle = require('../configs/backBlazeSingle');
 // const { PublicJob, PrivateJob, Internship } = require('../models/jobs-Models/job.schema');
 // const PrivateJob = require('../models/jobs-Models/privateJob.schema');
 
-const { UserJobsModel, jobPostData, JobDataModel } = require('../models/jobs-Models/job.schema');
+const { UserJobsModel, jobPostData, JobDataModel } = require('../models/job.schema');
 const Remoforce = require('../models/remoForce.schema');
 const Startup = require('../models/startup.schema');
 

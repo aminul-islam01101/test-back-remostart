@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 const mongoose = require('mongoose');
 const allValidator = require('validator');
-const { applicationRequestSchema, notificationSchema } = require('./jobs-Models/job.schema');
+const { applicationRequestSchema, notificationSchema } = require('./job.schema');
 
 
 

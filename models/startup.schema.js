@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 const mongoose = require('mongoose');
 const allValidator = require('validator');
-const { notificationSchema } = require('./jobs-Models/job.schema');
+const { notificationSchema } = require('./job.schema');
 
 const { ObjectId } = mongoose.Types;
 

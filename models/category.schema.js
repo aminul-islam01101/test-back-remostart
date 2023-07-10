@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { jobPostData } = require('./jobs-Models/job.schema');
+const { jobPostData } = require('./job.schema');
 /* eslint-disable new-cap */
 
 const categorySchema = mongoose.Schema({
