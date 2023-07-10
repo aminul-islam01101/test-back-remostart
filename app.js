@@ -38,58 +38,63 @@
 // });
 
 // module.exports = app;
-const cookieSession = require('cookie-session');
+
 const express = require('express');
 const cors = require('cors');
-const colors = require('colors');
-const http = require('http');
-
+const path = require('path');
 const passport = require('passport');
 
 const app = express();
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const MongoStore = require('connect-mongo');
 const logger = require('./middleware/logger');
-const { mongoDB } = require('./configs/db');
-const { connectDataBase } = require('./configs/db');
 const routes = require('./routes/routes');
-const { verifyToken } = require('./utils/jwtHelpers');
-const { userVerifier } = require('./middleware/userVerifier');
-
+const { corsOptions } = require('./configs/corsConfigs');
+const { sessionConfigs } = require('./configs/sessionConfigs');
 require('dotenv').config();
 
 // app.use(
 //   cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
 // );
-app.use(cookieParser())
-app.use(
-    cors({
-        origin: process.env.CLIENT,
-        methods: 'GET,POST,PUT,DELETE',
-        credentials: true,
-        
-    })
-);
-app.use([express.json(), express.urlencoded({ extended: true }), logger]);
-app.use(
-    session({
-        secret: 'cat',
-        resave: true,
-        saveUninitialized: true,
 
-        store: MongoStore.create({
-            mongoUrl: mongoDB,
-            collectionName: 'sessions',
-        }),
-        cookie: {
-            maxAge: 2419200000,
-            // production only
-            // secure: true
-            // sameSite: 'none',
-        },
-    })
-);
+// app.use(
+//     cors({
+//         origin: process.env.CLIENT,
+//         methods: 'GET,POST,PUT,DELETE',
+//         credentials: true,
+//     })
+// );
+
+app.use([
+    cors(corsOptions),
+    cookieParser(),
+    express.static(path.join(__dirname, '/public')),
+    express.json(),
+    express.urlencoded({ extended: true }),
+    logger,
+    session(sessionConfigs),
+]);
+// serve static files
+
+// app.use(
+//     session({
+//         secret: 'cat',
+//         resave: true,
+//         saveUninitialized: true,
+
+//         store: MongoStore.create({
+//             mongoUrl: mongoDB,
+//             collectionName: 'sessions',
+//         }),
+//         cookie: {
+//             maxAge: 50000,
+//             // maxAge: 2419200000,
+//             // production only
+//             // secure: true
+//             // sameSite: 'none',
+//         },
+//     })
+// );
 app.set('trust proxy', 1);
 
 app.use(passport.initialize());
@@ -98,8 +103,6 @@ app.use(passport.session());
 require('./configs/passport');
 require('./configs/passport.google');
 require('./configs/passport.linkedin');
-
-
 
 // tester
 // app.get('/', (req, res) => {
@@ -112,7 +115,7 @@ require('./configs/passport.linkedin');
 //         console.log('🚀 ~ file: app.js:105 ~ verifiedToken:', verifiedToken);
 //     } catch (error) {
 //        console.log("🚀 ~ file: app.js:110 ~ app.get ~ error:", error)
-       
+
 //     }
 // });
 
@@ -120,10 +123,14 @@ require('./configs/passport.linkedin');
 //     const hello='hello '
 //     console.log("🚀 ~ file: userVerifier.js:72 ~ userVerifier ~ hello:", hello)
 //     next()
-    
+
 //     }, (req, res) => {
 //     res.status(201).send('hello');
 // });
+// app.get('^/$|/index(.html)?', (_req, res) => {
+//     // res.send('test server is running');
+//      res.sendFile(path.join(__dirname, 'views', 'index.html'));
+//     });
 
 app.use(routes);
 // wrong path error route
@@ -136,6 +143,14 @@ app.use((err, req, res, next) => {
     if (res.headerSent) {
         return next(err);
     }
+
+    console.log('🌼 🔥🔥 file: app.js:173 🔥🔥 app.use 🔥🔥 err.name🌼', err.name);
+    console.log('🌼-------------------------------------🌼');
+    console.log('🌼 🔥🔥 file: app.js:173 🔥🔥 app.use 🔥🔥 err.message🌼', err.message);
+    console.log('🌼-------------------------------------🌼');
+
+    console.log('🌼 🔥🔥 file: app.js:178 🔥🔥 app.use 🔥🔥 err.stack🌼', err.stack);
+    console.log('🌼 --------------------------------------🌼');
 
     return res.status(500).send('Something broke in server!');
 });

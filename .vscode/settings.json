@@ -40,5 +40,14 @@
         "titleBar.inactiveBackground": "#045a5a99",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#045A5A"
+    "peacock.color": "#045A5A",
+    "turboConsoleLog.logMessagePrefix": "🌼",
+    "turboConsoleLog.logMessageSuffix": "🌼",
+    
+    "turboConsoleLog.insertEmptyLineAfterLogMessage": true,
+    "turboConsoleLog.wrapLogMessage": true,
+    "turboConsoleLog.insertEnclosingClass": true,
+    "turboConsoleLog.delimiterInsideMessage": "🔥🔥",
+    "turboConsoleLog.quote": "'",
+    "turboConsoleLog.addSemicolonInTheEnd": true,
 }

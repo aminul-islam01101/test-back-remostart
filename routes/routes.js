@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+
 const usersRouter = require('./users.route');
 const authRouter = require('./auth.route');
 const startupRouter = require('./startup.route');
@@ -15,9 +17,14 @@ const feedbackRoute = require('./feedback.route');
 
 const router = express.Router();
 // home route
-router.get('/', (_req, res) => {
-    res.send('test server is running');
+// router.get('/', (_req, res) => {
+//     res.send('test server is running');
+// });
+router.get('^/$|/index(.html)?', (_req, res) => {
+// res.send('test server is running');
+ res.sendFile(path.join(__dirname, '../views', 'index.html'));
 });
+
 // business route
 router.use('/api/users', usersRouter);
 router.use('/api/auth', authRouter);

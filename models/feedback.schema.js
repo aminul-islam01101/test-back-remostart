@@ -30,7 +30,7 @@ feedbackSchema.pre('save', async function preSaveHook(next) {
         message: this.message,
     });
     if (isExist) {
-        throw new Error('Thanks.You have already sent feedback');
+        throw new Error('failed');
     }
     next();
 });
