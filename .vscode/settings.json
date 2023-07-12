@@ -45,7 +45,7 @@
     "turboConsoleLog.logMessageSuffix": "🌼",
     
     "turboConsoleLog.insertEmptyLineAfterLogMessage": true,
-    "turboConsoleLog.wrapLogMessage": true,
+  
     "turboConsoleLog.insertEnclosingClass": true,
     "turboConsoleLog.delimiterInsideMessage": "🔥🔥",
     "turboConsoleLog.quote": "'",

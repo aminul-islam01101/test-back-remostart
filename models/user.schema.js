@@ -61,6 +61,7 @@ const userSchema = mongoose.Schema({
     },
 
     googleId: String,
+    confirmationToken: String,
     createdOn: {
         type: Date,
         default: Date.now,
