@@ -8,6 +8,13 @@ const backBlazeSingle = require('../configs/backBlazeSingle');
 const { UserJobsModel, jobPostData, JobDataModel } = require('../models/job.schema');
 const Remoforce = require('../models/remoForce.schema');
 const Startup = require('../models/startup.schema');
+const {
+    calculatePagination,
+    sortConditionSetter,
+} = require('../utils/paginations/pagination.calculator');
+const pick = require('../utils/pick');
+const { paginationFields } = require('../utils/paginations/pagination.constants');
+const { searchFilterCalculator } = require('../utils/searchAndFilter');
 
 const getCategories = (req, res) => {
     Category.find({}, (err, data) => {
@@ -228,7 +235,7 @@ const createJob = async (req, res) => {
 const contractsJob = async (req, res) => {
     const obj = JSON.parse(req.body.obj);
     const { email, categoryName } = obj;
-    console.log('categoryName---- ', categoryName);
+
 
     if (req.files.contractsPaper.length) {
         const url = await backBlazeSingle(req.files.contractsPaper[0]);
@@ -236,7 +243,7 @@ const contractsJob = async (req, res) => {
 
         obj.contractsPaper = url;
     }
-    console.log(obj);
+ 
     // res.send('route ok')
     try {
         const newJob = new JobDataModel(obj);
@@ -385,23 +392,108 @@ const getUsersJobs = async (req, res) => {
 // get all jobs
 const getAllJobs = async (req, res) => {
     const { email } = req.params;
-    try {
-        const jobs = await JobDataModel.find({
-            $or: [
-                { applicationRequest: { $exists: false } },
-                { applicationRequest: { $size: 0 } },
-                {
-                    applicationRequest: {
-                        $not: { $elemMatch: { applicantsEmail: email } },
-                    },
+    // constants
+    const jobFilterableFields = ['jobStatus', 'searchTerm', 'tags'];
+    const jobOrFields = ['skills', 'location', 'tags']; // tags and checkboxes(multiple field can be selected and all result(containing any of the selected field will be shown) )
+    const jobSearchableFields = ['title', 'description'];
+    const jobTagSearchableFields = ['title', 'description', 'categoryName', 'skills'];
+
+    // pick modifier
+    const filters = pick(req.query, jobFilterableFields);
+    const orFilter = pick(req.query, jobOrFields);
+    const paginationOptions = pick(req.query, paginationFields);
+
+    // arguments
+    const { searchTerm, tags, ...andFilters } = filters;
+    const { page, limit, skip, sortBy, sortOrder } = calculatePagination(paginationOptions);
+    const defaultFindCondition = {
+        $or: [
+            { applicationRequest: { $exists: false } },
+            { applicationRequest: { $size: 0 } },
+            {
+                applicationRequest: {
+                    $not: { $elemMatch: { applicantsEmail: email } },
                 },
-            ],
-        }).exec();
+            },
+        ],
+    };
+
+    const whereConditions = searchFilterCalculator(
+        searchTerm,
+        jobSearchableFields,
+        andFilters,
+        orFilter,
+        /* no need these(covered in orFilters) two fields if tags field only look tags field in data base. should pass if tags will look for multiple fields */
+        // tags,
+        // jobTagSearchableFields,
+        defaultFindCondition
+    );
+    const sortConditions = sortConditionSetter(sortBy, sortOrder, page, limit, skip);
+
+    try {
+        const result = await JobDataModel.find(whereConditions)
+            .sort(sortConditions)
+            .skip(skip)
+            .limit(limit)
+            .select('');
+        const total = await JobDataModel.countDocuments(whereConditions);
+
+        const jobs = {
+            success: true,
+            message: `${'Book retrieved successfully !'}`,
+
+            meta: {
+                page,
+                limit,
+                total,
+            },
+            data: result,
+        };
         res.status(200).json(jobs);
+        // res.status(200).json(jobs);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
+};
+const getAllRemoJobsFilters = async (req, res) => {
+    const { email } = req.params;
+
+    // Constants
+    const condition = {
+      $or: [
+        { applicationRequest: { $exists: false } },
+        { applicationRequest: { $size: 0 } },
+        {
+          applicationRequest: {
+            $not: { $elemMatch: { applicantsEmail: email } },
+          },
+        },
+      ],
+    };
+    
+    try {
+      const result = await JobDataModel.aggregate([
+        { $match: condition }, // Apply the initial condition to filter documents
+        { $unwind: "$skills" }, // Unwind the 'skills' array in each document
+        {
+          $group: {
+            _id: null,
+            skills: { $addToSet: "$skills" }, // Collect all unique 'skills' values
+            locations: { $addToSet: "$location" },
+            jobStatus: { $addToSet: "$jobStatus" },        
+        },
+        },
+        { $project: { _id: 0, skills: 1 , locations:1, jobStatus:1} }, // Exclude _id field and keep only 'skills' field
+      ]);
+    
+   const finalResult = result.length ? result[0] : { skills: [], locations: [],jobStatus:[] };
+   res.status(200).json(finalResult);
+    }
+     catch (error) {
+      console.error(error);
+    }
+    
 };
 // get all jobs
 const allAppliedJobs = async (req, res) => {
@@ -1055,5 +1147,7 @@ module.exports = {
     applicationRequests,
     createInterviewSchedule,
     allAppliedJobs,
+    getAllRemoJobsFilters,
 };
+
 // module.exports = { getCategories, publicJob, privateJob, internship, contracts };

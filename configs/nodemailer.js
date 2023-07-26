@@ -4,7 +4,7 @@ const { createTransport } = require('nodemailer');
 
 // node mailer configs for sending emails with nodemailer itself
 
-exports.sendMailWithNodeMailer = async (data) => {
+exports.sendMailWithNodeMailer = async (data,) => {
     try {
         const transporter = createTransport({
             service: 'gmail',
@@ -28,6 +28,8 @@ exports.sendMailWithNodeMailer = async (data) => {
 
         return info;
     } catch (error) {
-        console.log(error);
+        throw new Error('Email failure');
+
+    
     }
 };

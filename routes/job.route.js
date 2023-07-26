@@ -16,7 +16,7 @@ const {
     getUsersShadowingJobs,
     closeUsersJob,
     applicationRequests,
-
+    getAllRemoJobsFilters,
     getStatus,
     createInterviewSchedule,
     allAppliedJobs
@@ -31,7 +31,7 @@ const {
 const upload = require('../middleware/fileUploads');
 
 const router = express.Router();
-const multerErrorHandler = (err, req, res, next) => {
+ const multerErrorHandler = (err, req, res, next) => {
     if (err) {
         res.status(400).send({
             success: false,
@@ -71,6 +71,7 @@ router.get('/user-jobs/shadowing/:email', getUsersShadowingJobs);
 router.get('/apply-status', getStatus);
 // GET: Jobs
 router.get('/all-jobs/:email', getAllJobs);
+router.get('/all-remo-job-filters/:email', getAllRemoJobsFilters);
 router.get('/remoforce/shadowing', getCategoryJobs);
 router.get('/remoforce/public-job', getCategoryJobs);
 router.get('/remoforce/private-job', getCategoryJobs);

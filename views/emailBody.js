@@ -1,4 +1,4 @@
-exports.emailBody = (url) => `<!DOCTYPE html>
+exports.emailBody = (url, option, otp='') => `<!DOCTYPE html>
       <html>
       <head>
         <style>
@@ -42,7 +42,7 @@ exports.emailBody = (url) => `<!DOCTYPE html>
             <p>Dear User,</p>
             <p>We have received a request to reset your password. To proceed with the password reset, please click the link below:</p>
             <p>
-              <a class="button" href=${url}>Click Here</a>
+              <a class="button" href=${url}>Click Here to ${option}</a>
             </p>
             <p class="disabled-message">Please note that the link will be disabled in 10 minutes.</p>
             <p>If you did not request a password reset, please ignore this email.</p>

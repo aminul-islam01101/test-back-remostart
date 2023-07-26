@@ -95,6 +95,13 @@ const filter = (req, file, cb) => {
             cb(new Error('Not a pdf File!!'), false);
         }
     }
+    if (file.fieldname === 'requirements') {
+        if (type === 'pdf' || type === 'docx' || type === 'doc' ) {
+            cb(null, true);
+        } else {
+            cb(new Error('Not a pdf or doc File!!'), false);
+        }
+    }
 };
 const storage = multer.memoryStorage();
 const upload = multer({

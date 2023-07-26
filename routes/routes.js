@@ -13,6 +13,7 @@ const linkedinRoute = require('./linkedin.route');
 const CalenderRoute = require('./calender.route');
 const NotificationRoute = require('./notification.route');
 const feedbackRoute = require('./feedback.route');
+const  projectRoute = require('./project.route');
 
 
 const router = express.Router();
@@ -37,6 +38,7 @@ router.use('/auth', linkedinRoute);
 router.use('/calender', CalenderRoute);
 router.use('/api/notification', NotificationRoute);
 router.use('/api/feedback', feedbackRoute);
+router.use('/api/projects', projectRoute);
 
 
 

@@ -29,12 +29,12 @@ const updateRemoProfileSettings = async (req, res) => {
     // const uploadedFilesUrls = [];
     let profileUrl = '';
 
-    if (req.files.remoforceProfilePhoto.length) {
+    if (req.files?.remoforceProfilePhoto && req.files?.remoforceProfilePhoto.length) {
         profileUrl = await backBlazeSingle(req.files.remoforceProfilePhoto[0]);
 
         obj.remoforceProfilePhoto = profileUrl;
     }
-    if (req.files.resume.length) {
+    if (req.files?.resume && req.files?.resume.length) {
         const url = await backBlazeSingle(req.files.resume[0]);
         console.log(url);
 

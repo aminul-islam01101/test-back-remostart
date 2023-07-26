@@ -1,5 +1,7 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.schema');
@@ -7,8 +9,127 @@ const StartUp = require('../models/startup.schema');
 const RemoForce = require('../models/remoForce.schema');
 const { emailBody } = require('../views/emailBody');
 const { sendMailWithNodeMailer } = require('../configs/nodemailer');
+const { emailVerifyBody } = require('../views/emailVerifyBody');
 
 const saltRounds = 10;
+
+// const register = async (req, res) => {
+//     const {
+//         password,
+//         firstName,
+//         lastName,
+//         personalPhone,
+//         email,
+//         role,
+//         // designation,
+//         // companyId,
+//         // linkedIn,
+//         // officePhone,
+//         companyEmail,
+//         talentRequestPaymentDetails,
+//     } = req.body;
+
+//     try {
+//         // check existing user
+//         const userExist = await User.findOne({ email });
+
+//         if (userExist)
+//             return res.send({
+//                 success: false,
+//                 message: `user already registered as a ${userExist.role}`,
+//             });
+//         // saving a new user
+//         bcrypt.hash(password, saltRounds, async (err, hash) => {
+//             if (role === 'startup') {
+//                 const newStartup = new StartUp({
+//                     fullName: `${firstName} ${lastName}`,
+//                     email,
+//                     personalPhone,
+//                     // designation,
+//                     // companyId,
+//                     companyEmail,
+//                     // linkedIn,
+//                     // officePhone,
+//                     talentRequestPaymentDetails,
+//                 });
+
+//                 await newStartup
+//                     .save()
+//                     .then((startup) => console.log(startup))
+//                     .then(async () => {
+//                         const newStartupUser = await StartUp.findOne({ email });
+//                         const newUser = new User({
+//                             fullName: `${firstName} ${lastName}`,
+//                             email,
+//                             ventureId: newStartupUser._id,
+//                             password: hash,
+//                             personalPhone,
+//                             role,
+//                         });
+//                         await newUser.save().then((user) => {
+//                             res.send({
+//                                 success: true,
+//                                 message: 'User is created Successfully',
+//                                 user: {
+//                                     id: user._id,
+
+//                                     userName: user.fullName,
+//                                 },
+//                             });
+//                         });
+//                     })
+//                     .catch((error) => {
+//                         res.send({
+//                             success: false,
+//                             message: 'User is not created',
+//                             error,
+//                         });
+//                     });
+//             }
+//             if (role === 'remoforce') {
+//                 const newRemoForce = new RemoForce({
+//                     fullName: `${firstName} ${lastName}`,
+//                     email,
+//                     personalPhone,
+//                 });
+
+//                 await newRemoForce
+//                     .save()
+//                     .then((remoforce) => console.log(remoforce))
+//                     .then(async () => {
+//                         const newRemoForceUser = await RemoForce.findOne({ email });
+//                         const newUser = new User({
+//                             fullName: `${firstName} ${lastName}`,
+//                             email,
+//                             ventureId: newRemoForceUser._id,
+//                             password: hash,
+//                             personalPhone,
+//                             role,
+//                         });
+//                         await newUser.save().then((user) => {
+//                             res.send({
+//                                 success: true,
+//                                 message: 'User is created Successfully',
+//                                 user: {
+//                                     id: user._id,
+//                                     userName: user.fullName,
+//                                 },
+//                             });
+//                         });
+//                     })
+//                     .catch((error) => {
+//                         res.send({
+//                             success: false,
+//                             message: 'User is not created',
+//                             error,
+//                         });
+//                     });
+//             }
+//         });
+//     } catch (error) {
+//         res.status(500).send(error.message);
+//     }
+// };
 
 const register = async (req, res) => {
     const {
@@ -18,115 +139,127 @@ const register = async (req, res) => {
         personalPhone,
         email,
         role,
-        // designation,
-        // companyId,
-        // linkedIn,
-        // officePhone,
         companyEmail,
         talentRequestPaymentDetails,
     } = req.body;
 
-    try {
-        // check existing user
-        const userExist = await User.findOne({ email });
-
-        if (userExist)
-            return res.send({
-                success: false,
-                message: `user already registered as a ${userExist.role}`,
-            });
-        // saving a new user
-        bcrypt.hash(password, saltRounds, async (err, hash) => {
-            if (role === 'startup') {
-                const newStartup = new StartUp({
-                    fullName: `${firstName} ${lastName}`,
-                    email,
-                    personalPhone,
-                    // designation,
-                    // companyId,
-                    companyEmail,
-                    // linkedIn,
-                    // officePhone,
-                    talentRequestPaymentDetails,
-                });
-
-                await newStartup
-                    .save()
-                    .then((startup) => console.log(startup))
-                    .then(async () => {
-                        const newStartupUser = await StartUp.findOne({ email });
-                        const newUser = new User({
-                            fullName: `${firstName} ${lastName}`,
-                            email,
-                            ventureId: newStartupUser._id,
-                            password: hash,
-                            personalPhone,
-                            role,
-                        });
-                        await newUser.save().then((user) => {
-                            res.send({
-                                success: true,
-                                message: 'User is created Successfully',
-                                user: {
-                                    id: user._id,
-
-                                    userName: user.fullName,
-                                },
-                            });
-                        });
-                    })
-                    .catch((error) => {
-                        res.send({
-                            success: false,
-                            message: 'User is not created',
-                            error,
-                        });
-                    });
-            }
-            if (role === 'remoforce') {
-                const newRemoForce = new RemoForce({
-                    fullName: `${firstName} ${lastName}`,
-                    email,
-                    personalPhone,
-                });
-                console.log('hello');
-                await newRemoForce
-                    .save()
-                    .then((remoforce) => console.log(remoforce))
-                    .then(async () => {
-                        const newRemoForceUser = await RemoForce.findOne({ email });
-                        const newUser = new User({
-                            fullName: `${firstName} ${lastName}`,
-                            email,
-                            ventureId: newRemoForceUser._id,
-                            password: hash,
-                            personalPhone,
-                            role,
-                        });
-                        await newUser.save().then((user) => {
-                            res.send({
-                                success: true,
-                                message: 'User is created Successfully',
-                                user: {
-                                    id: user._id,
-                                    userName: user.fullName,
-                                },
-                            });
-                        });
-                    })
-                    .catch((error) => {
-                        res.send({
-                            success: false,
-                            message: 'User is not created',
-                            error,
-                        });
-                    });
-            }
+    const userExist = await User.findOne({ email });
+    if (userExist) {
+        // await session.commitTransaction();
+        // session.endSession();
+        return res.status(409).send({
+            success: false,
+            message: `User already registered as a ${userExist.role}`,
         });
+    }
+
+    const session = await mongoose.startSession();
+
+    let updatedData = null;
+    try {
+        session.startTransaction();
+        const hash = await bcrypt.hash(password, saltRounds);
+        const confirmationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '10m' });
+
+        const otp = Math.floor(1000 + Math.random() * 9000);
+
+        if (role === 'startup') {
+            const newStartup = new StartUp({
+                fullName: `${firstName} ${lastName}`,
+                email,
+                personalPhone,
+                companyEmail,
+                talentRequestPaymentDetails,
+            });
+
+            const createdStartup = await newStartup.save({ session });
+            const newStartupUser = new User({
+                fullName: `${firstName} ${lastName}`,
+                email,
+                ventureId: createdStartup._id,
+                password: hash,
+                personalPhone,
+                role,
+                signInMethod: 'not-verified',
+                confirmationToken: otp.toString(),
+            });
+
+            const createdStartupUser = await newStartupUser.save({ session });
+
+            updatedData = createdStartupUser;
+        } else if (role === 'remoforce') {
+            const newRemoForce = new RemoForce({
+                fullName: `${firstName} ${lastName}`,
+                email,
+                personalPhone,
+            });
+
+            const createdRemoForce = await newRemoForce.save({ session });
+
+            const newRemoForceUser = new User({
+                fullName: `${firstName} ${lastName}`,
+                email,
+                ventureId: createdRemoForce._id,
+                password: hash,
+                personalPhone,
+                role,
+                signInMethod: 'not-verified',
+                confirmationToken: otp.toString(),
+            });
+
+            const createdRemoForceUser = await newRemoForceUser.save({ session });
+
+            updatedData = createdRemoForceUser;
+        }
+
+        const url = `${process.env.CLIENT}/verify-email?email=${updatedData.email}`;
+        const option = 'verify email';
+        const mailData = {
+            to: [email],
+            subject: 'verify your Email',
+            html: emailVerifyBody(url, option, otp),
+        };
+
+        // Sending email within the transaction
+        const message = await sendMailWithNodeMailer(mailData);
+        if (!message.messageId) {
+            throw new Error('Email failure');
+        }
+
+        await session.commitTransaction();
+        session.endSession();
     } catch (error) {
-        res.status(500).send(error.message);
+        await session.abortTransaction();
+        session.endSession();
+
+        return res.status(500).send({
+            success: false,
+            message:
+                error.message === 'Email failure'
+                    ? 'User registration failed due to Email failure'
+                    : 'User registration failed',
+            error: error.message,
+        });
+    }
+    if (updatedData?.email) {
+        res.status(200).send({
+            success: true,
+            message: 'User registration successful',
+            user: {
+                id: updatedData._id,
+                userName: updatedData.fullName,
+                email: updatedData.email,
+            },
+            data: '/verify-email',
+        });
+    } else {
+        res.status(500).send({
+            success: false,
+            message: 'User registration failed',
+        });
     }
 };
+
 const login = async (req, res) => {
     const { email, password } = req.body;
     const userExist = await User.findOne({ email });
@@ -137,6 +270,38 @@ const login = async (req, res) => {
             success: false,
             message: 'User is not found',
         });
+    }
+    if (userExist.signInMethod === 'not-verified') {
+        const otp = Math.floor(1000 + Math.random() * 9000);
+        const url = `${process.env.CLIENT}/verify-email?email=${userExist.email}`;
+        const option = 'verify email';
+        const mailData = {
+            to: [email],
+            subject: 'verify your Email',
+            html: emailVerifyBody(url, option, otp),
+        };
+
+        // Sending email within the transaction
+        const message = await sendMailWithNodeMailer(mailData);
+        if (!message.messageId) {
+            throw new Error('Email failure');
+        }
+        const updatedData = await User.findOneAndUpdate(
+            { email },
+            {
+                $set: {
+                    confirmationToken: otp.toString(),
+                },
+            },
+            { new: true }
+        );
+        if (updatedData) {
+            return res.send({
+                message: 'not-verified',
+                data: '/verify-email',
+                email: userExist.email,
+            });
+        }
     }
 
     if (!bcrypt.compareSync(password, userExist.password)) {
@@ -238,11 +403,12 @@ const forgotPass = async (req, res) => {
             return;
         }
         const url = `${process.env.CLIENT}/reset-pass?token=${confirmationToken}`;
+        const option = 'Reset password';
         const mailData = {
             to: [email],
             subject: 'Reset Your Password',
 
-            html: emailBody(url),
+            html: emailBody(url, option),
         };
 
         const message = await sendMailWithNodeMailer(mailData);
@@ -311,6 +477,104 @@ const resetPass = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const verifyEmail = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        const userExist = await User.findOne({ email }).exec();
+
+        if (!userExist) {
+            res.status(404).send({
+                success: false,
+                message: 'User not found',
+            });
+
+            return;
+        }
+        if (!otp) {
+            res.status(404).send({
+                success: false,
+                message: 'otp not found',
+            });
+
+            return;
+        }
+
+        if (userExist.confirmationToken === otp) {
+            const updatedData = await User.findOneAndUpdate(
+                { email },
+                {
+                    $set: {
+                        confirmationToken: null,
+                        signInMethod: 'verified',
+                    },
+                },
+                { new: true }
+            );
+
+            if (updatedData) {
+                return res.status(200).send({
+                    success: true,
+                    message: 'you have successfully verified your email ',
+                });
+            }
+        }
+
+        return res.status(200).send({
+            success: false,
+            message: 'verification failed ',
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+const resendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const userExist = await User.findOne({ email }).exec();
+
+        if (!userExist) {
+            res.status(404).send({
+                success: false,
+                message: 'User not found',
+            });
+
+            return;
+        }
+        const otp = Math.floor(1000 + Math.random() * 9000);
+        const url = `${process.env.CLIENT}/verify-email?email=${userExist.email}`;
+        const option = 'verify email';
+        const mailData = {
+            to: [email],
+            subject: 'verify your Email',
+            html: emailVerifyBody(url, option, otp),
+        };
+
+        // Sending email within the transaction
+        const message = await sendMailWithNodeMailer(mailData);
+        if (!message.messageId) {
+            throw new Error('Email failure');
+        }
+
+        const updatedData = await User.findOneAndUpdate(
+            { email },
+            {
+                $set: {
+                    confirmationToken: otp.toString(),
+                },
+            },
+            { new: true }
+        );
+        if (updatedData) {
+            return res.status(200).send({
+                success: true,
+            });
+        }
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
 
 module.exports = {
     register,
@@ -318,4 +582,6 @@ module.exports = {
     user,
     forgotPass,
     resetPass,
+    verifyEmail,
+    resendOtp,
 };
