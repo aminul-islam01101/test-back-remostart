@@ -292,17 +292,17 @@ const getMyRequests = async (req, res) => {
         const transactionId = talentRequestPaymentDetails?.transactionId;
         console.log(tier, transactionId);
         let totalMatch = 0;
-        let requestsInCurrentTier =[]
+        let requestsInCurrentTier = [];
 
-        if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
-           
-           
+        if (
+            startup.talentRequestHistory[tier] &&
+            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier]] &&
+            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
+        ) {
             const isValidTransactionId = startup?.talentRequestHistory[tier].find(
                 (eachTransaction) => eachTransaction.transactionId === transactionId
             );
             if (isValidTransactionId) {
-                        
-           
                 totalMatch = startup.talentRequestHistory[tier][
                     startup.talentRequestHistory[tier].length - 1
                 ].searchHistory.reduce(
@@ -310,8 +310,9 @@ const getMyRequests = async (req, res) => {
                     0
                 );
                 requestsInCurrentTier =
-                startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
-                    .searchHistory;
+                    startup.talentRequestHistory[tier][
+                        startup.talentRequestHistory[tier].length - 1
+                    ].searchHistory;
             }
 
             // const totalMatch = startup.talentRequestHistory[tier].reduce(
@@ -330,8 +331,6 @@ const getMyRequests = async (req, res) => {
             // res.send(job.applicationRequest);
             res.send(myRequestData);
         } else {
-           
-            
             const myRequestData = {
                 totalMatch,
                 myRequests,

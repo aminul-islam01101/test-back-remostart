@@ -294,10 +294,10 @@ const startupUserSchema = new mongoose.Schema({
         },
     },
     talentRequestPaymentDetails: {
-        id: ObjectId,
+        id: ObjectId || null,
         tier: { type: String },
-        transactionId: { type: String },
-        searchLimit: { type: Number },
+        transactionId: { type: String || null },
+        searchLimit: { type: Number, default: 2 },
     },
     calenderTokens: {
         accessToken: { type: String },
@@ -305,11 +305,11 @@ const startupUserSchema = new mongoose.Schema({
     },
     notifications: [notificationSchema],
     //
-    // createdAt: {
-    //     type: Date,
-    //     immutable: true,
-    //     default: () => Date.now(),
-    // },
+    createdAt: {
+        type: Date,
+        immutable: true,
+        default: () => Date.now(),
+    },
 
     // updatedAt: {
     //     type: Date,

@@ -43,8 +43,8 @@ const router = express.Router();
 };
 
 // Post job using POST method
-router.post('/public-job', createJob);
-router.post('/private-job', createJob);
+router.post('/public', createJob);
+router.post('/private', createJob);
 router.post('/internship', createJob);
 router.post('/gigs', createJob);
 router.post('/shadowing', createJob);
