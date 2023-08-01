@@ -236,14 +236,13 @@ const contractsJob = async (req, res) => {
     const obj = JSON.parse(req.body.obj);
     const { email, categoryName } = obj;
 
-
     if (req.files.contractsPaper.length) {
         const url = await backBlazeSingle(req.files.contractsPaper[0]);
         console.log(url);
 
         obj.contractsPaper = url;
     }
- 
+
     // res.send('route ok')
     try {
         const newJob = new JobDataModel(obj);
@@ -461,53 +460,92 @@ const getAllRemoJobsFilters = async (req, res) => {
 
     // Constants
     const condition = {
-      $or: [
-        { applicationRequest: { $exists: false } },
-        { applicationRequest: { $size: 0 } },
-        {
-          applicationRequest: {
-            $not: { $elemMatch: { applicantsEmail: email } },
-          },
-        },
-      ],
+        $or: [
+            { applicationRequest: { $exists: false } },
+            { applicationRequest: { $size: 0 } },
+            {
+                applicationRequest: {
+                    $not: { $elemMatch: { applicantsEmail: email } },
+                },
+            },
+        ],
     };
-    
+
     try {
-      const result = await JobDataModel.aggregate([
-        { $match: condition }, // Apply the initial condition to filter documents
-        { $unwind: "$skills" }, // Unwind the 'skills' array in each document
-        {
-          $group: {
-            _id: null,
-            skills: { $addToSet: "$skills" }, // Collect all unique 'skills' values
-            locations: { $addToSet: "$location" },
-            jobStatus: { $addToSet: "$jobStatus" },        
-        },
-        },
-        { $project: { _id: 0, skills: 1 , locations:1, jobStatus:1} }, // Exclude _id field and keep only 'skills' field
-      ]);
-    
-   const finalResult = result.length ? result[0] : { skills: [], locations: [],jobStatus:[] };
-   res.status(200).json(finalResult);
+        const result = await JobDataModel.aggregate([
+            { $match: condition }, // Apply the initial condition to filter documents
+            { $unwind: '$skills' }, // Unwind the 'skills' array in each document
+            {
+                $group: {
+                    _id: null,
+                    skills: { $addToSet: '$skills' }, // Collect all unique 'skills' values
+                    locations: { $addToSet: '$location' },
+                    jobStatus: { $addToSet: '$jobStatus' },
+                },
+            },
+            { $project: { _id: 0, skills: 1, locations: 1, jobStatus: 1 } }, // Exclude _id field and keep only 'skills' field
+        ]);
+
+        const finalResult = result.length
+            ? result[0]
+            : { skills: [], locations: [], jobStatus: [] };
+        res.status(200).json(finalResult);
+    } catch (error) {
+        console.error(error);
     }
-     catch (error) {
-      console.error(error);
-    }
-    
 };
 // get all jobs
 const allAppliedJobs = async (req, res) => {
     const { email } = req.params;
+
     try {
-        const remoforce = await Remoforce.findOne({
-            email,
-        });
-        const appliedJobs = remoforce?.allApplications || [];
-        res.status(200).json(appliedJobs);
+        const result = await JobDataModel.aggregate([
+            { $match: { 'applicationRequest.applicantsEmail': email } },
+            { $unwind: '$applicationRequest' },
+
+            {
+                $group: {
+                    _id: '$applicationRequest.jobId',
+                    jobStatus: { $first: '$jobStatus' },
+                    data: { $push: '$applicationRequest' },
+                },
+            },
+
+            {
+                $project: {
+                    _id: 0,
+
+                    jobStatus: 1,
+                    data: 1,
+                },
+            },
+        ]);
+
+        // Flatten the result to get the desired output
+        const flattenedResult = result.flatMap((item) =>
+            // Add "jobStatus" property to each object in the data array
+            item.data.map((obj) => ({
+                jobStatus: item.jobStatus,
+                ...obj,
+            }))
+        );
+
+        console.log(result);
+        res.status(200).json(flattenedResult);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
+    // try {
+    //     const remoforce = await Remoforce.findOne({
+    //         email,
+    //     });
+    //     const appliedJobs = remoforce?.allApplications || [];
+    //     res.status(200).json(appliedJobs);
+    // } catch (err) {
+    //     console.error(err.message);
+    //     res.status(500).send('Server Error');
+    // }
 };
 // const getAllJobs = async (req, res) => {
 //     try {
@@ -1035,6 +1073,97 @@ const applicationRequests = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+// const createInterviewSchedule = async (req, res) => {
+//     const {
+//         applicantsEmail,
+//         jobId,
+//         startupsEmail,
+//         interviewStatus,
+//         scheduleDetails,
+//         startupsName,
+//         applicantsName,
+//         jobTitle,
+//         type,
+//         stage,
+//         status,
+//     } = req.body;
+
+//     const remoforceNotificationObject = {
+//         jobId,
+//         startupsEmail,
+//         startupName: startupsName,
+//         remoforceName: applicantsName,
+//         remoforceEmail: applicantsEmail,
+//         jobTitle,
+//         type,
+//         stage,
+//         status,
+//     };
+
+//     // res.send('route ok')
+//     console.log(jobId.yellow.bold);
+
+//     try {
+//         // Find the job post by ID
+//         const job = await JobDataModel.findById(jobId);
+//         if (!job) {
+//             return res.status(404).send('Job post not found');
+//         }
+//         const jobToUpdate = job.applicationRequest.find(
+//             (request) => request.applicantsEmail === applicantsEmail
+//         );
+//         jobToUpdate.interviewSchedule = scheduleDetails;
+//         jobToUpdate.applicationStatus = interviewStatus;
+//         // Update the application request's status to "accepted"
+//         await job.save();
+//         // Update the user's job posts as well
+//         const userJobPosts = await UserJobsModel.findOne({ email: startupsEmail });
+//         if (!userJobPosts) {
+//             return res.status(404).send('Job post not found');
+//         }
+//         const jobsToUpdate = userJobPosts.jobs.find((post) => post.jobId === jobId);
+//         jobsToUpdate.interviewSchedule = scheduleDetails;
+//         jobsToUpdate.applicationStatus = interviewStatus;
+
+//         await userJobPosts.save();
+
+//         // Update the remoforce all application posts as well
+//         const remoforce = await Remoforce.findOne({ email: applicantsEmail });
+
+//         const applicationToUpdate = remoforce.allApplications.find(
+//             (application) => application.jobId === jobId
+//         );
+//         console.log(remoforce);
+//         applicationToUpdate.interviewSchedule = scheduleDetails;
+//         applicationToUpdate.applicationStatus = interviewStatus;
+
+//         if (!remoforce.notifications) {
+//             remoforce.notifications = [];
+//             remoforce.notifications.push(remoforceNotificationObject);
+//         } else {
+//             const alreadyExist = remoforce.notifications.find(
+//                 (request) =>
+//                     request.remoforceEmail === remoforceNotificationObject.remoforceEmail &&
+//                     request.jobId === remoforceNotificationObject.jobId &&
+//                     request.type === remoforceNotificationObject.type &&
+//                     request.stage === remoforceNotificationObject.stage
+//             );
+//             if (!alreadyExist) {
+//                 remoforce.notifications.push(remoforceNotificationObject);
+//             }
+//         }
+//         await remoforce.save();
+
+//         res.status(200).send({
+//             message: 'Event creation successful.Pls check your calender',
+//             data: remoforce.notifications,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Server error');
+//     }
+// };
+
 const createInterviewSchedule = async (req, res) => {
     const {
         applicantsEmail,
@@ -1062,46 +1191,49 @@ const createInterviewSchedule = async (req, res) => {
         status,
     };
 
-    // res.send('route ok')
-    console.log(jobId.yellow.bold);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
         // Find the job post by ID
-        const job = await JobDataModel.findById(jobId);
+        const job = await JobDataModel.findById(jobId).session(session);
         if (!job) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(404).send('Job post not found');
         }
+
+        // Update job data
         const jobToUpdate = job.applicationRequest.find(
             (request) => request.applicantsEmail === applicantsEmail
         );
         jobToUpdate.interviewSchedule = scheduleDetails;
         jobToUpdate.applicationStatus = interviewStatus;
-        // Update the application request's status to "accepted"
-        await job.save();
-        // Update the user's job posts as well
-        const userJobPosts = await UserJobsModel.findOne({ email: startupsEmail });
+        await job.save({ session });
+
+        // Update user's job posts
+        const userJobPosts = await UserJobsModel.findOne({ email: startupsEmail }).session(session);
         if (!userJobPosts) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(404).send('Job post not found');
         }
         const jobsToUpdate = userJobPosts.jobs.find((post) => post.jobId === jobId);
         jobsToUpdate.interviewSchedule = scheduleDetails;
         jobsToUpdate.applicationStatus = interviewStatus;
+        await userJobPosts.save({ session });
 
-        await userJobPosts.save();
-
-        // Update the remoforce all application posts as well
-        const remoforce = await Remoforce.findOne({ email: applicantsEmail });
-
+        // Update remoforce all application posts
+        const remoforce = await Remoforce.findOne({ email: applicantsEmail }).session(session);
         const applicationToUpdate = remoforce.allApplications.find(
             (application) => application.jobId === jobId
         );
-        console.log(remoforce);
         applicationToUpdate.interviewSchedule = scheduleDetails;
         applicationToUpdate.applicationStatus = interviewStatus;
 
+        // Update notifications
         if (!remoforce.notifications) {
-            remoforce.notifications = [];
-            remoforce.notifications.push(remoforceNotificationObject);
+            remoforce.notifications = [remoforceNotificationObject];
         } else {
             const alreadyExist = remoforce.notifications.find(
                 (request) =>
@@ -1114,13 +1246,21 @@ const createInterviewSchedule = async (req, res) => {
                 remoforce.notifications.push(remoforceNotificationObject);
             }
         }
-        await remoforce.save();
+
+        await remoforce.save({ session });
+
+        // Commit the transaction
+        await session.commitTransaction();
+        session.endSession();
 
         res.status(200).send({
-            message: 'Event creation successful.Pls check your calender',
+            message: 'Event creation successful. Please check your calendar',
             data: remoforce.notifications,
         });
     } catch (error) {
+        // If an error occurs, abort the transaction and end the session
+        await session.abortTransaction();
+        session.endSession();
         console.error(error);
         res.status(500).send('Server error');
     }

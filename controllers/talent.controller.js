@@ -293,12 +293,13 @@ const getMyRequests = async (req, res) => {
         console.log(tier, transactionId);
         let totalMatch = 0;
         let requestsInCurrentTier = [];
+        // (
+        //     startup.talentRequestHistory[tier] &&
+        //     startup.talentRequestHistory[tier][startup.talentRequestHistory[tier]] &&
+        //     startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
+        // )
 
-        if (
-            startup.talentRequestHistory[tier] &&
-            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier]] &&
-            startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]
-        ) {
+        if (startup.talentRequestHistory[tier][startup.talentRequestHistory[tier].length - 1]) {
             const isValidTransactionId = startup?.talentRequestHistory[tier].find(
                 (eachTransaction) => eachTransaction.transactionId === transactionId
             );

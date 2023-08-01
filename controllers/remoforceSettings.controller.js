@@ -23,7 +23,7 @@ const removeFiles = (files) => {
 
 const updateRemoProfileSettings = async (req, res) => {
     const obj = JSON.parse(req.body.obj);
-    const { email } = obj;
+    const { email , remoforceProfilePhoto} = obj;
 
     // console.log(homePageImages);
     // const uploadedFilesUrls = [];
@@ -50,7 +50,7 @@ const updateRemoProfileSettings = async (req, res) => {
         if (email) {
             const updateUser = await User.updateOne(
                 { email },
-                { profilePhoto: profileUrl },
+                { profilePhoto: profileUrl || remoforceProfilePhoto },
                 { upsert: true }
             );
             const response = await Remoforce.updateOne({ email }, obj, { upsert: true });

@@ -23,7 +23,7 @@ const removeFiles = (files) => {
 
 const updateProfileSettings = async (req, res) => {
     const obj = JSON.parse(req.body.obj);
-    const { email } = obj;
+    const { email,startupIcon } = obj;
     // const startupIcon = req.files?.startupIcon[0];
     const  homePageImages  = req.files?.homePageImages;
 
@@ -49,7 +49,7 @@ const updateProfileSettings = async (req, res) => {
         if (email) {
             const updateUser = await User.updateOne(
                 { email },
-                { profilePhoto: profileUrl },
+                { profilePhoto: profileUrl || startupIcon },
                 { upsert: true }
             );
             const response = await Startup.updateOne({ email }, obj, { upsert: true });
