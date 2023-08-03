@@ -187,6 +187,15 @@ const remoforceSchema = mongoose.Schema({
     ],
     allApplications:[applicationRequestSchema],
     notifications:[notificationSchema],
+    profileScore: {
+        totalScore: {type: Number, default:0},
+        profile: {type: Number, default:0},
+        skill: {type: Number, default:0},
+        education: {type: Number, default:0},
+        experience: {type: Number, default:0},
+        projects: {type: Number, default:0},
+        accounts: {type: Number, default:0},
+    },
 
   
   

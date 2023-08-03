@@ -576,6 +576,87 @@ const resendOtp = async (req, res) => {
     }
 };
 
+const getRemoforceScore = async (req, res) => {
+    const { email } = req.params;
+
+    const remoforce = await RemoForce.findOne({ email });
+    const { profileScore } = remoforce;
+    let score = profileScore.totalScore;
+
+    if (profileScore.totalScore < 96) {
+        if (profileScore.profile < 25) {
+            if (
+                remoforce.personalDetails &&
+                Object.keys(remoforce.personalDetails).length > 0 &&
+                remoforce.resume &&
+                remoforce.remoforceProfilePhoto
+            ) {
+                remoforce.profileScore.profile = 25;
+                score += 25;
+            }
+        }
+        if (profileScore.skill < 20) {
+            if (
+                remoforce.selectedSkills &&
+                remoforce.selectedSkills.length > 0 &&
+                remoforce.softSkills &&
+                remoforce.softSkills.length > 0 &&
+                remoforce.selectedLanguages &&
+                remoforce.selectedLanguages.length > 0 &&
+                remoforce.jobPreference &&
+                Object.keys(remoforce.jobPreference).length > 0
+            ) {
+                remoforce.profileScore.skill = 20;
+                score += 20;
+            }
+        }
+        if (profileScore.education < 20) {
+            if (remoforce.educationDetails && remoforce.educationDetails.length > 0) {
+                remoforce.profileScore.education = 20;
+                score += 20;
+            }
+        }
+        if (profileScore.experience < 15) {
+            
+
+            
+            if (remoforce.experienceDetails && remoforce.experienceDetails.length > 0) {
+                remoforce.profileScore.experience = 15;
+                score += 15;
+            }
+        }
+        if (profileScore.projects < 15) {
+            console.log('🌼 🔥🔥 file: auth.controller.js:629 🔥🔥 getRemoforceScore 🔥🔥 profileScore.projects🌼', profileScore.projects);
+
+            if (remoforce.projectDetails && remoforce.projectDetails.length > 0) {
+                remoforce.profileScore.projects = 15;
+                score += 15;
+            }
+        }
+        if (profileScore.accounts < 5) {
+            if (
+                remoforce.personalDetails &&
+                Object.keys(remoforce.personalDetails).length > 0 &&
+                remoforce.personalDetails.alternativeEmail
+            ) {
+                remoforce.profileScore.accounts = 5;
+                score += 5;
+            }
+        }
+
+        remoforce.profileScore.totalScore = score;
+        await remoforce.save();
+    }
+
+    try {
+        res.status(200).send({
+            success: true,
+            data: remoforce.profileScore,
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
 module.exports = {
     register,
     login,
@@ -584,4 +665,5 @@ module.exports = {
     resetPass,
     verifyEmail,
     resendOtp,
+    getRemoforceScore,
 };

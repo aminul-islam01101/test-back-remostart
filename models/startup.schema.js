@@ -304,6 +304,7 @@ const startupUserSchema = new mongoose.Schema({
         refreshToken: { type: String },
     },
     notifications: [notificationSchema],
+    profileScore: { type: Number, default:0},
     //
     createdAt: {
         type: Date,

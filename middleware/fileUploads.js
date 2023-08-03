@@ -66,7 +66,7 @@ const filter = (req, file, cb) => {
         if (type === 'jpg' || type === 'jpeg' || type === 'png') {
             cb(null, true);
         } else {
-            cb(new Error('Not a jpg/jpeg File!!'), false);
+            cb(new Error('Selected image is not a jpg/jpeg/png File!!'), false);
         }
     }
     if (
@@ -92,7 +92,7 @@ const filter = (req, file, cb) => {
         if (type === 'pdf') {
             cb(null, true);
         } else {
-            cb(new Error('Not a pdf File!!'), false);
+            cb(new Error('Resume Must be a pdf file'), false);
         }
     }
     if (file.fieldname === 'requirements') {
