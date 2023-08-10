@@ -21,6 +21,7 @@ const {
     createInterviewSchedule,
     allAppliedJobs
 } = require('../controllers/job.controller');
+const { genericUpload } = require('../middleware/fileUploads');
 // const {
 //     getCategories,
 //     publicJob,
@@ -28,7 +29,7 @@ const {
 //     internship,
 //     contracts,
 // } = require('../controllers/job.controller');
-const upload = require('../middleware/fileUploads');
+
 
 const router = express.Router();
  const multerErrorHandler = (err, req, res, next) => {
@@ -50,13 +51,13 @@ router.post('/gigs', createJob);
 router.post('/shadowing', createJob);
 router.post(
     '/contracts',
-    upload.fields([{ name: 'contractsPaper', maxCount: 1 }]),
+    genericUpload.fields([{ name: 'contractsPaper', maxCount: 1 }]),
     multerErrorHandler,
     contractsJob
 );
 router.put(
     '/contracts/:id',
-    upload.fields([{ name: 'contractsPaper', maxCount: 1 }]),
+    genericUpload.fields([{ name: 'contractsPaper', maxCount: 1 }]),
     multerErrorHandler,
     editContractsJob
 );

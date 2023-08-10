@@ -10,6 +10,7 @@ const {
     getMatchedTalents,
     getMyJobRequests
 } = require('../controllers/remoforceSettings.controller');
+const { resumeUpload } = require('../middleware/fileUploads');
 // const {
 //     updateGeneralSettingsPersonal,
 //     updateGeneralSettingsVerification,
@@ -18,7 +19,7 @@ const {
 //     startupData,
 //     verificationRequest,
 // } = require('../controllers/startupSettings.controller');
-const upload = require('../middleware/fileUploads');
+
 
 const multerErrorHandler = (err, req, res, next) => {
     if (err) {
@@ -46,7 +47,8 @@ const router = express.Router();
 // );
 router.put(
     '/remoforce-settings-profile',
-    upload.fields([
+   
+    resumeUpload.fields([
         { name: 'remoforceProfilePhoto', maxCount: 1 },
         { name: 'resume', maxCount: 1 },
     ]),

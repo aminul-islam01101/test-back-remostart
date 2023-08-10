@@ -56,11 +56,84 @@ const path = require('path');
 //     },
 
 // });
-const filter = (req, file, cb) => {
+// const filter = (req, file, cb) => {
+//     const type = file.mimetype.split('/')[1];
+//     if (
+//         file.fieldname === 'startupIcon' ||
+//         // file.fieldname === 'homePageImages' ||
+//         file.fieldname === 'remoforceProfilePhoto'
+//     ) {
+//         if (type === 'jpg' || type === 'jpeg' || type === 'png') {
+//             cb(null, true);
+//         } else {
+//             cb(new Error('Selected image is not a jpg/jpeg/png File!!'), false);
+//         }
+//     }
+//     if (
+//         file.fieldname === 'companyId' ||
+//         file.fieldname === 'drivingLicense' ||
+//         file.fieldname === 'passport' ||
+//         file.fieldname === 'panCard' ||
+//         file.fieldname === 'adharCard' ||
+//         file.fieldname === 'gSTIN' ||
+//         file.fieldname === 'addressProof' ||
+//         file.fieldname === 'companyPAN' ||
+//         file.fieldname === 'cINDocument' ||
+//         file.fieldname === 'others' ||
+//         file.fieldname === 'contractsPaper'
+//     ) {
+//         if (type === 'pdf' || type === 'jpg' || type === 'jpeg' || type === 'png') {
+//             cb(null, true);
+//         } else {
+//             cb(new Error('file should be in .pdf|.jpg|.jpeg|.png format!!'), false);
+//         }
+//     }
+//     if (file.fieldname === 'resume') {
+//         if (type === 'pdf') {
+//             cb(null, true);
+//         } else {
+//             cb(new Error('Resume Must be a pdf file'), false);
+//         }
+//     }
+//     if (file.fieldname === 'requirements') {
+//         if (type === 'pdf' || type === 'docx' || type === 'doc' ) {
+//             cb(null, true);
+//         } else {
+//             cb(new Error('Not a pdf or doc File!!'), false);
+//         }
+//     }
+// };
+// const storage = multer.memoryStorage();
+// const upload = multer({
+//     storage,
+//     limits: {
+//         fileSize: 1000000,
+//         // fieldSize:  1016 * 1016,
+//     },
+//     fileFilter: filter,
+// });
+
+// module.exports = upload;
+
+// Common filter for image files (jpg, jpeg, png)
+const imageFilter = (req, file, cb) => {
     const type = file.mimetype.split('/')[1];
+    const allowedTypes = ['jpg', 'jpeg', 'png'];
+
+    if (allowedTypes.includes(type)) {
+        cb(null, true);
+    } else {
+        cb(new Error('File should be in .jpg|.jpeg|.png format!!'), false);
+    }
+};
+
+// Filter for resume files (pdf)
+const resumeFilter = (req, file, cb) => {
+    const type = file.mimetype.split('/')[1];
+
     if (
         file.fieldname === 'startupIcon' ||
-        file.fieldname === 'homePageImages' ||
+        // file.fieldname === 'homePageImages' ||
         file.fieldname === 'remoforceProfilePhoto'
     ) {
         if (type === 'jpg' || type === 'jpeg' || type === 'png') {
@@ -69,48 +142,76 @@ const filter = (req, file, cb) => {
             cb(new Error('Selected image is not a jpg/jpeg/png File!!'), false);
         }
     }
-    if (
-        file.fieldname === 'companyId' ||
-        file.fieldname === 'drivingLicense' ||
-        file.fieldname === 'passport' ||
-        file.fieldname === 'panCard' ||
-        file.fieldname === 'adharCard' ||
-        file.fieldname === 'gSTIN' ||
-        file.fieldname === 'addressProof' ||
-        file.fieldname === 'companyPAN' ||
-        file.fieldname === 'cINDocument' ||
-        file.fieldname === 'others' ||
-        file.fieldname === 'contractsPaper'
-    ) {
-        if (type === 'pdf' || type === 'jpg' || type === 'jpeg' || type === 'png') {
-            cb(null, true);
-        } else {
-            cb(new Error('file should be in .pdf|.jpg|.jpeg|.png format!!'), false);
-        }
-    }
+
     if (file.fieldname === 'resume') {
         if (type === 'pdf') {
             cb(null, true);
         } else {
             cb(new Error('Resume Must be a pdf file'), false);
         }
-    }
-    if (file.fieldname === 'requirements') {
-        if (type === 'pdf' || type === 'docx' || type === 'doc' ) {
-            cb(null, true);
-        } else {
-            cb(new Error('Not a pdf or doc File!!'), false);
-        }
+    } 
+};
+
+// Filter for requirements files (pdf, docx, doc)
+const requirementsFilter = (req, file, cb) => {
+    const type = file.mimetype.split('/')[1];
+    const allowedTypes = ['pdf', 'docx', 'doc'];
+
+    if (allowedTypes.includes(type)) {
+        cb(null, true);
+    } else {
+        cb(new Error('File should be in .pdf|.docx|.doc format!!'), false);
     }
 };
-const storage = multer.memoryStorage();
-const upload = multer({
-    storage,
+const genericFileFilter = (req, file, cb) => {
+  
+
+    const type = file.mimetype.split('/')[1];
+
+    const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png'];
+
+    if (allowedTypes.includes(type)) {
+        cb(null, true);
+    } else {
+        cb(new Error('File should be in .pdf|.jpg|.jpeg|.png format!!'), false);
+    }
+};
+
+// Create multer instances with different filters
+const genericUpload = multer({
+    storage: multer.memoryStorage(),
     limits: {
         fileSize: 1000000,
-        // fieldSize:  1016 * 1016,
     },
-    fileFilter: filter,
+    fileFilter: genericFileFilter,
+});
+const imageUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter: imageFilter,
 });
 
-module.exports = upload;
+const resumeUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter: resumeFilter,
+});
+
+const requirementsUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter: requirementsFilter,
+});
+
+module.exports = {
+    imageUpload,
+    resumeUpload,
+    requirementsUpload,
+    genericUpload,
+};

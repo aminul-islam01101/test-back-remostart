@@ -137,6 +137,8 @@ const register = async (req, res) => {
         firstName,
         lastName,
         personalPhone,
+        startupName,
+        startupPhoneNumber,
         email,
         role,
         companyEmail,
@@ -165,20 +167,20 @@ const register = async (req, res) => {
 
         if (role === 'startup') {
             const newStartup = new StartUp({
-                fullName: `${firstName} ${lastName}`,
+                startupName,
                 email,
-                personalPhone,
-                companyEmail,
+                officePhone: startupPhoneNumber,
+                // companyEmail,
                 talentRequestPaymentDetails,
             });
 
             const createdStartup = await newStartup.save({ session });
             const newStartupUser = new User({
-                fullName: `${firstName} ${lastName}`,
+                fullName: startupName,
                 email,
                 ventureId: createdStartup._id,
                 password: hash,
-                personalPhone,
+                personalPhone: startupPhoneNumber,
                 role,
                 signInMethod: 'not-verified',
                 confirmationToken: otp.toString(),
@@ -617,17 +619,12 @@ const getRemoforceScore = async (req, res) => {
             }
         }
         if (profileScore.experience < 15) {
-            
-
-            
             if (remoforce.experienceDetails && remoforce.experienceDetails.length > 0) {
                 remoforce.profileScore.experience = 15;
                 score += 15;
             }
         }
         if (profileScore.projects < 15) {
-            console.log('🌼 🔥🔥 file: auth.controller.js:629 🔥🔥 getRemoforceScore 🔥🔥 profileScore.projects🌼', profileScore.projects);
-
             if (remoforce.projectDetails && remoforce.projectDetails.length > 0) {
                 remoforce.profileScore.projects = 15;
                 score += 15;
@@ -657,6 +654,73 @@ const getRemoforceScore = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+const getStartupScore = async (req, res) => {
+    const { email } = req.params;
+
+    const startup = await StartUp.findOne({ email });
+  if (startup.registrationData) {
+    console.log('🌼 🔥🔥 file: auth.controller.js:661 🔥🔥 getStartupScore 🔥🔥 startup🌼', Object.keys({...startup.registrationData.toObject()}).length);
+  }
+
+    const { profileScore } = startup;
+
+    let score = profileScore.totalScore;
+
+    if (profileScore.totalScore < 96) {
+        if (profileScore.profile < 60) {
+            if (
+                startup.startupDescription &&
+                startup.startupIcon &&
+                startup.startupSlogan &&
+                startup.worksIn &&
+                startup.domains &&
+                startup.domains.length > 0 
+                // startup.socialLinks &&
+                // startup.socialLinks.length > 0
+            ) {
+                startup.profileScore.profile = 60;
+                score += 60;
+            }
+        }
+        if (profileScore.personnel < 10) {
+            if (
+                startup.fullName &&
+                startup.designation &&
+                startup.personalPhone &&
+                startup.linkedIn &&
+                startup.personalIds &&
+                Object.keys(startup.personalIds).length > 0 &&
+                startup.secondaryEmail
+            ) {
+                startup.profileScore.personnel = 10;
+                score += 10;
+            }
+        }
+        if (profileScore.registration < 10) {
+            if (startup.registrationData && Object.keys({...startup.registrationData.toObject()}).length > 0) {
+                startup.profileScore.registration = 10;
+                score += 10;
+            }
+        }
+        if (profileScore.founder < 20) {
+            if (startup.foundersDetail && Object.keys({...startup.foundersDetail.toObject()}).length  > 0) {
+                startup.profileScore.founder = 20;
+                score += 20;
+            }
+        }
+    }
+    startup.profileScore.totalScore = score;
+    await startup.save();
+    try {
+        res.status(200).send({
+            success: true,
+            data: startup.profileScore,
+        });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -666,4 +730,5 @@ module.exports = {
     verifyEmail,
     resendOtp,
     getRemoforceScore,
+    getStartupScore,
 };

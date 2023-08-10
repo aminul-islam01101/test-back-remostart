@@ -10,7 +10,8 @@ const {
     verificationRequest,
  
 } = require('../controllers/startupSettings.controller');
-const upload = require('../middleware/fileUploads');
+const { genericUpload, imageUpload } = require('../middleware/fileUploads');
+
 
 // const multerErrorHandler = (err, req, res, next) => {
 //     if (err) {
@@ -49,36 +50,37 @@ const router = express.Router();
 // );
 router.put(
     '/settings-profile',
-    upload.fields([
+    imageUpload.fields([
         { name: 'startupIcon', maxCount: 1 },
-        { name: 'homePageImages', maxCount: 5 },
+        // { name: 'homePageImages', maxCount: 5 },
     ]),
     multerErrorHandler,
     updateProfileSettings
 );
 router.put(
     '/settings-general-personal',
-    upload.fields([
-        { name: 'panCard', maxCount: 1, optional: true },
-        { name: 'adharCard', maxCount: 1, optional: true },
-        { name: 'drivingLicense', maxCount: 1, optional: true },
-        { name: 'passport', maxCount: 1, optional: true },
-    ]),
+    genericUpload.any(),
     multerErrorHandler,
     updateGeneralSettingsPersonal
 );
 router.put(
     '/settings-general-verification',
-    upload.fields([
-        { name: 'gSTIN', maxCount: 1, optional: true },
-        { name: 'addressProof', maxCount: 1, optional: true },
-        { name: 'cINDocument', maxCount: 1, optional: true },
-        { name: 'companyPAN', maxCount: 1, optional: true },
-        { name: 'others', maxCount: 1, optional: true },
-    ]),
+    genericUpload.any(),
     multerErrorHandler,
     updateGeneralSettingsVerification
 );
+// router.put(
+//     '/settings-general-verification',
+//     genericUpload.fields([
+//         { name: 'gSTIN', maxCount: 1, optional: true },
+//         { name: 'addressProof', maxCount: 1, optional: true },
+//         { name: 'cINDocument', maxCount: 1, optional: true },
+//         { name: 'companyPAN', maxCount: 1, optional: true },
+//         { name: 'others', maxCount: 1, optional: true },
+//     ]),
+//     multerErrorHandler,
+//     updateGeneralSettingsVerification
+// );
 
 // verify pass
 router.post(

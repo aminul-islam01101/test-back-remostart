@@ -21,7 +21,7 @@ async function backBlazeSingle(file) {
     const fileData = file.buffer;
     // const fileData = fs.readFileSync(file.path);
 
-    console.log(file);
+   
     const fileExt = path.extname(file.originalname);
     const fileFirstName = `${file.originalname
         .replace(fileExt, '')

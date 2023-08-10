@@ -8,7 +8,7 @@ const {
     resetPass,
     verifyEmail,
     resendOtp,
-    getRemoforceScore
+    getRemoforceScore, getStartupScore
 } = require('../controllers/auth.controller');
 const { userVerifier } = require('../middleware/userVerifier');
 
@@ -24,6 +24,7 @@ router.post('/reset-pass', resetPass);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-otp', resendOtp);
 router.get('/profile-score/remoforce/:email', getRemoforceScore);
+router.get('/profile-score/startup/:email', getStartupScore);
 
 // test route
 // router.get('/user', userVerifier, user);

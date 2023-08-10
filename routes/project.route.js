@@ -1,7 +1,8 @@
 const express = require('express');
 const addProject = require('../controllers/project.controller');
+const { requirementsUpload } = require('../middleware/fileUploads');
 
-const upload = require('../middleware/fileUploads');
+
 
 const router = express.Router();
 const multerErrorHandler = (err, req, res, next) => {
@@ -17,7 +18,7 @@ const multerErrorHandler = (err, req, res, next) => {
 
 router.post(
     '/',
-    upload.fields([{ name: 'requirements', maxCount: 1 }]),
+    requirementsUpload.fields([{ name: 'requirements', maxCount: 1 }]),
     multerErrorHandler,
     addProject
 );

@@ -162,7 +162,7 @@ const startupUserSchema = new mongoose.Schema({
     },
     startupName: {
         type: String,
-        maxLength: 30,
+        maxLength: 100,
     },
     startupSlogan: {
         type: String,
@@ -179,7 +179,7 @@ const startupUserSchema = new mongoose.Schema({
     domains: {
         type: [String],
     },
-    homePageImages: [String],
+    // homePageImages: [String],
     socialLinks: {
         Github: String,
         Linkedin: String,
@@ -188,24 +188,16 @@ const startupUserSchema = new mongoose.Schema({
     },
     //--------------------------------------------
     personalIds: {
-        passport: {
-            type: String,
-        },
-
-        drivingLicense: {
-            type: String,
-        },
-        panCard: {
-            type: String,
-        },
-        adharCard: {
-            type: String,
-        },
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
     },
 
     // ------------------------------------- verification info
 
-    companyAddress: {
+    registrationData: {
+        registered: {
+            type: Boolean,
+        },
         place: String,
         city: {
             type: String,
@@ -224,12 +216,12 @@ const startupUserSchema = new mongoose.Schema({
             // required:[true,"country in address should be required"],
             maxlength: [50, 'No country name conatin more 50 words'],
         },
-        region: {
-            type: String,
-            trim: true,
-            // required:[true,"country in address should be required"],
-            maxlength: [50, 'No country name conatin more 50 words'],
-        },
+        // region: {
+        //     type: String,
+        //     trim: true,
+        //     // required:[true,"country in address should be required"],
+        //     maxlength: [50, 'No country name conatin more 50 words'],
+        // },
         PIN: {
             type: Number,
 
@@ -238,10 +230,7 @@ const startupUserSchema = new mongoose.Schema({
             //     message: 'PIN code is invalid',
             // }
         },
-        gstinNumber: { type: Number },
-        registered: {
-            type: Boolean,
-        },
+
         incubatedAt: {
             type: String,
             maxlength: 60,
@@ -251,24 +240,21 @@ const startupUserSchema = new mongoose.Schema({
             // required: [function () {return this.registered},"register date is required"],
         },
         registeredName: { type: String },
+        registrationNumber: {
+            type: String,
+            // required: [function () {return this.registered},"CIN no. is required"],
+            // validate:{
+            //     validator: v =>{ return /^([LUu]{1})([0-9]{5})([A-Za-z]{2})([0-9]{4})([A-Za-z]{3})([0-9]{6})$/.test(v)},
+            //     message: props => `${props.value} is not a CIN number`
+            // },// CIN Validation /^([LUu]{1})([0-9]{5})([A-Za-z]{2})([0-9]{4})([A-Za-z]{3})([0-9]{6})$/
+        },
     },
     verificationRequest: Boolean,
     verificationStatus: Boolean,
-    startupCIN: {
-        type: String,
-        // required: [function () {return this.registered},"CIN no. is required"],
-        // validate:{
-        //     validator: v =>{ return /^([LUu]{1})([0-9]{5})([A-Za-z]{2})([0-9]{4})([A-Za-z]{3})([0-9]{6})$/.test(v)},
-        //     message: props => `${props.value} is not a CIN number`
-        // },// CIN Validation /^([LUu]{1})([0-9]{5})([A-Za-z]{2})([0-9]{4})([A-Za-z]{3})([0-9]{6})$/
-    },
 
     companyDocs: {
-        addressProof: { type: String },
-        gSTIN: { type: String },
-        cINDocument: { type: String },
-        companyPAN: { type: String },
-        others: { type: String },
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
     },
 
     foundersDetail: {
@@ -304,7 +290,13 @@ const startupUserSchema = new mongoose.Schema({
         refreshToken: { type: String },
     },
     notifications: [notificationSchema],
-    profileScore: { type: Number, default:0},
+    profileScore: {
+        totalScore: { type: Number, default: 0 },
+        profile: { type: Number, default: 0 },
+        personnel: { type: Number, default: 0 },
+        registration: { type: Number, default: 0 },
+        founder: { type: Number, default: 0 },
+    },
     //
     createdAt: {
         type: Date,

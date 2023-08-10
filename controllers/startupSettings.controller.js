@@ -23,12 +23,12 @@ const removeFiles = (files) => {
 
 const updateProfileSettings = async (req, res) => {
     const obj = JSON.parse(req.body.obj);
-    const { email,startupIcon } = obj;
+    const { email, startupIcon } = obj;
     // const startupIcon = req.files?.startupIcon[0];
-    const  homePageImages  = req.files?.homePageImages;
+    // const  homePageImages  = req.files?.homePageImages;
 
     // console.log(homePageImages);
-    const uploadedFilesUrls = [];
+    // const uploadedFilesUrls = [];
 
     let profileUrl = '';
     if (req.files?.startupIcon && req.files?.startupIcon?.length) {
@@ -36,13 +36,13 @@ const updateProfileSettings = async (req, res) => {
 
         obj.startupIcon = profileUrl;
     }
-    if (homePageImages && homePageImages?.length) {
-        for (const file of homePageImages) {
-            const url = await backBlazeSingle(file);
-            uploadedFilesUrls.push(url);
-        }
-        obj.homePageImages = uploadedFilesUrls;
-    }
+    // if (homePageImages && homePageImages?.length) {
+    //     for (const file of homePageImages) {
+    //         const url = await backBlazeSingle(file);
+    //         uploadedFilesUrls.push(url);
+    //     }
+    //     obj.homePageImages = uploadedFilesUrls;
+    // }
     // removeFiles(req.files);
 
     try {
@@ -66,34 +66,67 @@ const updateProfileSettings = async (req, res) => {
     }
 };
 const updateGeneralSettingsPersonal = async (req, res) => {
-    const { email } = req.body;
+    const obj = JSON.parse(req.body.obj);
+    const { email } = obj;
 
-    const { files } = req; // get uploaded files from request
+    const { files } = req;
 
-    const uploadedFilesUrls = {};
+    if (req.files && req.files.length) {
+        try {
+            const uploadPromises = files.map(async (file) => {
+                const url = await backBlazeSingle(file);
+                return { [file.fieldname]: url };
+            });
 
-    for (const fileKey in files) {
-        const file = files[fileKey][0];
-        const url = await backBlazeSingle(file);
-        uploadedFilesUrls[fileKey] = url;
+            const uploadedDocuments = await Promise.all(uploadPromises);
+            const mergedPersonalIds = uploadedDocuments.reduce(
+                (result, current) => ({ ...result, ...current }),
+                {}
+            );
+            obj.personalIds = { ...obj.personalIds, ...mergedPersonalIds  };
+        } catch (error) {
+            // Handle error if file upload fails
+            return res.status(500).send({ message: 'File upload error' });
+        }
     }
+
+    // res.send('ok')
+    // const uploadedFilesUrls = {};
+    // let updateDoc = req.body
+
+    // if (req.files && req.files.length) {
+
+    //     files.forEach(async(file) => {
+    //         const url = await backBlazeSingle(file);
+    //         obj.personalIds = [...obj.personalIds, { [file.fieldname]: url }];
+
+    //     })
+
+    // for (const file in files) {
+    // const file = files[fileKey][0];
+    // const url = await backBlazeSingle(file);
+    // obj.personalIds = [...obj.personalIds, { [file.fieldName]: url }];
+    // uploadedFilesUrls[fileKey] = url;
+    // }
+
+    // const document = Object.keys(uploadedFilesUrls).map((key) => ({
+    //     [key]: uploadedFilesUrls[key],
+    // }));
+
+    //  updateDoc = { ...req.body, personalIds: document };
+    // }
+
     // removeFiles(files);
 
     // obj.personalIds = personalIds;
-    const document = Object.keys(uploadedFilesUrls).map((key) => ({
-        [key]: uploadedFilesUrls[key],
-    }));
 
-    const updateDoc = { ...req.body, personalIds: document };
-
-    console.log(updateDoc);
-    // console.log(uploadedFilesUrls);
+    console.log(obj);
 
     // res.send('route ok');
 
     try {
         if (email) {
-            const response = await Startup.updateOne({ email }, updateDoc, { upsert: true });
+            const response = await Startup.updateOne({ email }, obj, { upsert: true });
             res.status(200).send(response);
         } else {
             // removeFiles(req.files);
@@ -107,26 +140,29 @@ const updateGeneralSettingsPersonal = async (req, res) => {
     }
 };
 const updateGeneralSettingsVerification = async (req, res) => {
-    const { files } = req; // get uploaded files from request
-
-    const uploadedFilesUrls = {};
-    const obj = JSON.parse(req.body.data);
-
+    const obj = JSON.parse(req.body.obj);
     const { email } = obj;
 
-    for (const fileKey in files) {
-        const file = files[fileKey][0];
-        const url = await backBlazeSingle(file);
-        uploadedFilesUrls[fileKey] = url;
+    const { files } = req; // get uploaded files from request
+
+    if (req.files && req.files.length) {
+        try {
+            const uploadPromises = files.map(async (file) => {
+                const url = await backBlazeSingle(file);
+                return { [file.fieldname]: url };
+            });
+
+            const uploadedDocuments = await Promise.all(uploadPromises);
+            const mergedCompanyDocs = uploadedDocuments.reduce(
+                (result, current) => ({ ...result, ...current }),
+                {}
+            );
+            obj.companyDocs = { ...obj.companyDocs, ...mergedCompanyDocs };
+        } catch (error) {
+            // Handle error if file upload fails
+            return res.status(500).send({ message: 'File upload error' });
+        }
     }
-    // removeFiles(files);
-
-    // obj.personalIds = personalIds;
-    const document = Object.keys(uploadedFilesUrls).map((key) => ({
-        [key]: uploadedFilesUrls[key],
-    }));
-
-    const updateDoc = { ...obj, companyDocs: document };
 
     // console.log(uploadedFilesUrls);
 
@@ -134,8 +170,8 @@ const updateGeneralSettingsVerification = async (req, res) => {
 
     try {
         if (email) {
-            const response = await Startup.updateOne({ email }, updateDoc, { upsert: true });
-            console.log(updateDoc);
+            const response = await Startup.updateOne({ email }, obj, { upsert: true });
+
             res.status(200).send(response);
         } else {
             console.log('hello');
@@ -240,5 +276,4 @@ module.exports = {
     updatePass,
     startupData,
     verificationRequest,
-   
 };
