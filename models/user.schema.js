@@ -62,7 +62,7 @@ const userSchema = mongoose.Schema({
 
     googleId: String,
     confirmationToken: String,
-    createdOn: {
+    timestamp: {
         type: Date,
         default: Date.now,
     },

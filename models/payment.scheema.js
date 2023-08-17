@@ -10,7 +10,7 @@ const paymentSchema = mongoose.Schema({
     tier: { type: String },
     transactionId: { type: String },
     searchLimit: { type: Number },
-    createdOn: {
+    timestamp: {
         type: Date,
         default: Date.now,
     },

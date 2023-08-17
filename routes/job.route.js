@@ -19,7 +19,8 @@ const {
     getAllRemoJobsFilters,
     getStatus,
     createInterviewSchedule,
-    allAppliedJobs
+    allAppliedJobs,
+    getPrivatePublicJobs
 } = require('../controllers/job.controller');
 const { genericUpload } = require('../middleware/fileUploads');
 // const {
@@ -76,6 +77,7 @@ router.get('/all-remo-job-filters/:email', getAllRemoJobsFilters);
 router.get('/remoforce/shadowing', getCategoryJobs);
 router.get('/remoforce/public-job', getCategoryJobs);
 router.get('/remoforce/private-job', getCategoryJobs);
+router.get('/remoforce/private-public', getPrivatePublicJobs);
 router.get('/remoforce/internship', getCategoryJobs);
 router.get('/remoforce/gigs', getCategoryJobs);
 router.get('/remoforce/contracts', getCategoryJobs);

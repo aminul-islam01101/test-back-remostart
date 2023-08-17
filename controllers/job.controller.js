@@ -575,6 +575,47 @@ const getCategoryJobs = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
+const getPrivatePublicJobs = async (req, res) => {
+   
+try {
+    const result = await Category.aggregate([
+      {
+        $match: {
+          $or: [
+            { categoryName: 'Public' },
+            { categoryName: 'Private' }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          combinedJobs: {
+            $push: "$jobs"
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          jobs: {
+            $reduce: {
+              input: "$combinedJobs",
+              initialValue: [],
+              in: { $concatArrays: ["$$value", "$$this"] }
+            }
+          }
+        }
+      }
+    ]).exec();
+  
+    const combinedJobs = result[0].jobs;
+        res.status(200).send(combinedJobs);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
 // GET active jobs
 const getUsersActiveJobs = async (req, res) => {
     const { email } = req.params;
@@ -1288,6 +1329,7 @@ module.exports = {
     createInterviewSchedule,
     allAppliedJobs,
     getAllRemoJobsFilters,
+    getPrivatePublicJobs
 };
 
 // module.exports = { getCategories, publicJob, privateJob, internship, contracts };

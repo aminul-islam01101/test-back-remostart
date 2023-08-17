@@ -298,10 +298,9 @@ const startupUserSchema = new mongoose.Schema({
         founder: { type: Number, default: 0 },
     },
     //
-    createdAt: {
+    timestamp: {
         type: Date,
-        immutable: true,
-        default: () => Date.now(),
+        default: Date.now,
     },
 
     // updatedAt: {

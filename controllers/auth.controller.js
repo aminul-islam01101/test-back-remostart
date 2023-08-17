@@ -215,10 +215,10 @@ const register = async (req, res) => {
         }
 
         const url = `${process.env.CLIENT}/verify-email?email=${updatedData.email}`;
-        const option = 'verify email';
+        const option = {name:updatedData.fullName};
         const mailData = {
             to: [email],
-            subject: 'verify your Email',
+            subject: 'Verify your Email',
             html: emailVerifyBody(url, option, otp),
         };
 
@@ -546,10 +546,10 @@ const resendOtp = async (req, res) => {
         }
         const otp = Math.floor(1000 + Math.random() * 9000);
         const url = `${process.env.CLIENT}/verify-email?email=${userExist.email}`;
-        const option = 'verify email';
+        const option = {name:userExist.fullName};
         const mailData = {
             to: [email],
-            subject: 'verify your Email',
+            subject: 'Verify your Email',
             html: emailVerifyBody(url, option, otp),
         };
 
