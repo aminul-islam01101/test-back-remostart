@@ -13,8 +13,7 @@ const linkedinRoute = require('./linkedin.route');
 const CalenderRoute = require('./calender.route');
 const NotificationRoute = require('./notification.route');
 const feedbackRoute = require('./feedback.route');
-const  projectRoute = require('./project.route');
-
+const projectRoute = require('./project.route');
 
 const router = express.Router();
 // home route
@@ -22,8 +21,8 @@ const router = express.Router();
 //     res.send('test server is running');
 // });
 router.get('^/$|/index(.html)?', (_req, res) => {
-// res.send('test server is running');
- res.sendFile(path.join(__dirname, '../views', 'index.html'));
+    // res.send('test server is running');
+    res.sendFile(path.join(__dirname, '../views', 'index.html'));
 });
 
 // business route
@@ -31,7 +30,7 @@ router.use('/api/users', usersRouter);
 router.use('/api/auth', authRouter);
 router.use('/api/startup', startupRouter);
 router.use('/api/remoforce', remoforceRouter);
-router.use('/api/talent', talentRouter );
+router.use('/api/talent', talentRouter);
 router.use('/api/job', jobRouter);
 router.use('/auth', googleRoute);
 router.use('/auth', linkedinRoute);
@@ -39,9 +38,5 @@ router.use('/calender', CalenderRoute);
 router.use('/api/notification', NotificationRoute);
 router.use('/api/feedback', feedbackRoute);
 router.use('/api/projects', projectRoute);
-
-
-
-
 
 module.exports = router;

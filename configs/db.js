@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 mongoose.set('strictQuery', true);
- const mongoDB = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.dtbllhc.mongodb.net/Remo?retryWrites=true&w=majority`;
+  const mongoDB = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.dtbllhc.mongodb.net/Remo?retryWrites=true&w=majority`;
+ // const mongoDB = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gbfuhy6.mongodb.net/Remo?retryWrites=true&w=majority`;
 
 const connectDataBase = async () => {
     try {
