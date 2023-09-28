@@ -43,11 +43,12 @@
     "peacock.color": "#045A5A",
     "turboConsoleLog.logMessagePrefix": "🌼",
     "turboConsoleLog.logMessageSuffix": "🌼",
-    
+
     "turboConsoleLog.insertEmptyLineAfterLogMessage": true,
-  
+
     "turboConsoleLog.insertEnclosingClass": true,
     "turboConsoleLog.delimiterInsideMessage": "🔥🔥",
     "turboConsoleLog.quote": "'",
     "turboConsoleLog.addSemicolonInTheEnd": true,
+    "editor.fontSize": 15
 }
