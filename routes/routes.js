@@ -14,6 +14,7 @@ const CalenderRoute = require('./calender.route');
 const NotificationRoute = require('./notification.route');
 const feedbackRoute = require('./feedback.route');
 const projectRoute = require('./project.route');
+const orgRoute = require('./orgRoute/org.route');
 
 const router = express.Router();
 // home route
@@ -38,5 +39,6 @@ router.use('/calender', CalenderRoute);
 router.use('/api/notification', NotificationRoute);
 router.use('/api/feedback', feedbackRoute);
 router.use('/api/projects', projectRoute);
+router.use('/api/org', orgRoute);
 
 module.exports = router;
