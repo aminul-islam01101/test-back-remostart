@@ -108,7 +108,7 @@ const startupMakeRead = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
-const startupMakeAllRead= async (req, res) => {
+const startupMakeAllRead = async (req, res) => {
     const { email } = req.params; // Use req.params instead of req.par
 
     try {
@@ -140,5 +140,5 @@ module.exports = {
     getStartupNotifications,
     startupMakeRead,
     remoforceMakeAllRead,
-    startupMakeAllRead
+    startupMakeAllRead,
 };

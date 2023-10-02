@@ -1,6 +1,7 @@
 const express = require('express');
-const adminRouter = require('./org.admin.route');
+const adminRouter = require('./org.superAdmin.route');
 const teamRouter = require('./org.team.route');
+const AuthRoutes = require('./org.user.route');
 
 const orgRouter = express.Router();
 
@@ -9,6 +10,10 @@ orgRouter.get('/health', async (req, res) => {
 });
 
 const moduleRoutes = [
+    {
+        path: '/',
+        route: AuthRoutes,
+    },
     {
         path: '/admin',
         route: adminRouter,
