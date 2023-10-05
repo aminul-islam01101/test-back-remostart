@@ -1,7 +1,7 @@
 exports.orgUserRole = {
     SUPER_ADMIN: 'super_admin',
     ADMIN: 'admin',
-    MARKETING: 'marketing',
-    CONTENT: 'content',
-    DEVELOPMENT: 'development',
+    MARKETING: 'marketer',
+    CONTENT: 'content_creator',
+    DEVELOPMENT: 'developer',
 };
