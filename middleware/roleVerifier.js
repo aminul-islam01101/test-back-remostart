@@ -25,6 +25,8 @@ module.exports.roleVerifier =
 
                 const verifiedUser = verifyAccessToken(accessToken, process.env.JWT_SECRET);
                 req.user = verifiedUser;
+                console.log('🌼 🔥🔥 file: roleVerifier.js:28 🔥🔥 verifiedUser🌼', verifiedUser);
+
                 if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
                     res.status(401).send({
                         success: false,
@@ -74,13 +76,16 @@ module.exports.roleVerifier =
                     );
 
                     // Send the new access token in the response
-                    res.cookie('token', `Bearer ${newAccessToken}`, {
+                    res.cookie('access_token', `Bearer ${newAccessToken}`, {
                         secure: true,
                         sameSite: 'none',
                         //  httpOnly: true
                     });
 
                     req.user = verifiedRefreshToken;
+                    console.log('🌼 🔥🔥 file: roleVerifier.js:84 🔥🔥 req.user🌼', req.user);
+
+                    
                     next();
                 } catch (refreshTokenError) {
                     res.status(401).send({

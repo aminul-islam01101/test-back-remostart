@@ -48,7 +48,10 @@ const orgUserSchema = mongoose.Schema(
 );
 
 orgUserSchema.statics.isUserExist = async function isUserExist(email) {
-    return this.findOne({ email}, { id: 1, password: 1, role: 1, needsPasswordChange: 1 });
+    return this.findOne(
+        { email },
+        { id: 1, password: 1, role: 1, email: 1, needsPasswordChange: 1 }
+    );
 };
 orgUserSchema.statics.isPasswordMatched = async function isPasswordMatched(
     givenPassword,

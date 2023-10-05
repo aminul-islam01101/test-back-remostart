@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const {
     generateAdminId,
     generateDevelopmentId,
@@ -7,6 +8,7 @@ const {
 } = require('../../utils/orgUserUtils/org.user.id');
 const orgUser = require('../../models/orgModels/org.usr.schema');
 const { createToken } = require('../../utils/jwtHelpers');
+const { sendMailWithNodeMailer } = require('../../configs/nodemailer');
 
 module.exports.loginUser = async (req, res) => {
     const { ...loginData } = req.body;
@@ -57,15 +59,43 @@ module.exports.loginUser = async (req, res) => {
     }
 };
 module.exports.changePassword = async (req, res) => {
+    const { user } = req;
+    const { ...passwordData } = req.body;
+    const { oldPassword, newPassword } = passwordData;
+
     try {
-        res.send('user logged');
+        const isUserExist = await orgUser.isUserExist(user?.email);
+        if (!isUserExist) {
+            throw new Error('User does not exist');
+        }
+
+        // checking old password
+        if (
+            isUserExist.password &&
+            !(await orgUser.isPasswordMatched(oldPassword, isUserExist.password))
+        ) {
+            throw new Error('Old Password is incorrect');
+        }
+        isUserExist.password = newPassword;
+        isUserExist.needsPasswordChange = false;
+
+        // updating using save()
+        isUserExist.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Password changed successfully !',
+        });
     } catch (error) {
         console.log(error);
     }
 };
 module.exports.createUser = async (req, res) => {
     const user = req.body;
+    let newUserAllData = null;
+    const session = await mongoose.startSession();
     try {
+        session.startTransaction();
         const isUserExist = await orgUser.isUserExist(user.email);
         if (isUserExist) {
             return res.status(409).json({
@@ -94,18 +124,39 @@ module.exports.createUser = async (req, res) => {
             const id = await generateMarketerId();
             user.id = id;
         }
-        const newUser = await orgUser.create(user);
+        const newUser = await orgUser.create([user], { session });
+        if (!newUser.length) {
+            throw new Error('Failed to create Team member');
+        }
+        [newUserAllData] = newUser;
+        const mailData = {
+            to: [user.email],
+            subject: 'welcome to remostarts organizer panel',
+            html: `you are new ${user.role}`,
+        };
 
-        res.status(201).json({
-            status: 'success',
-            message: 'team user created successfully!',
-            data: newUser,
-        });
+        // Sending email within the transaction
+        const message = await sendMailWithNodeMailer(mailData);
+        if (!message.messageId) {
+            throw new Error('Email failure');
+        }
+
+        await session.commitTransaction();
+        session.endSession();
     } catch (error) {
-        res.status(500).json({
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).json({
             status: 'failed',
             message: 'user creation failed',
             data: null,
+        });
+    }
+    if (newUserAllData?.email) {
+        res.status(201).json({
+            status: 'success',
+            message: 'team user created successfully!',
+            data: newUserAllData,
         });
     }
 };

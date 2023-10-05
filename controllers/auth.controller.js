@@ -215,7 +215,7 @@ const register = async (req, res) => {
         }
 
         const url = `${process.env.CLIENT}/verify-email?email=${updatedData.email}`;
-        const option = {name:updatedData.fullName};
+        const option = { name: updatedData.fullName };
         const mailData = {
             to: [email],
             subject: 'Verify your Email',
@@ -546,7 +546,7 @@ const resendOtp = async (req, res) => {
         }
         const otp = Math.floor(1000 + Math.random() * 9000);
         const url = `${process.env.CLIENT}/verify-email?email=${userExist.email}`;
-        const option = {name:userExist.fullName};
+        const option = { name: userExist.fullName };
         const mailData = {
             to: [email],
             subject: 'Verify your Email',
@@ -658,9 +658,12 @@ const getStartupScore = async (req, res) => {
     const { email } = req.params;
 
     const startup = await StartUp.findOne({ email });
-  if (startup.registrationData) {
-    console.log('🌼 🔥🔥 file: auth.controller.js:661 🔥🔥 getStartupScore 🔥🔥 startup🌼', Object.keys({...startup.registrationData.toObject()}).length);
-  }
+    if (startup.registrationData) {
+        console.log(
+            '🌼 🔥🔥 file: auth.controller.js:661 🔥🔥 getStartupScore 🔥🔥 startup🌼',
+            Object.keys({ ...startup.registrationData.toObject() }).length
+        );
+    }
 
     const { profileScore } = startup;
 
@@ -674,7 +677,7 @@ const getStartupScore = async (req, res) => {
                 startup.startupSlogan &&
                 startup.worksIn &&
                 startup.domains &&
-                startup.domains.length > 0 
+                startup.domains.length > 0
                 // startup.socialLinks &&
                 // startup.socialLinks.length > 0
             ) {
@@ -697,13 +700,19 @@ const getStartupScore = async (req, res) => {
             }
         }
         if (profileScore.registration < 10) {
-            if (startup.registrationData && Object.keys({...startup.registrationData.toObject()}).length > 0) {
+            if (
+                startup.registrationData &&
+                Object.keys({ ...startup.registrationData.toObject() }).length > 0
+            ) {
                 startup.profileScore.registration = 10;
                 score += 10;
             }
         }
         if (profileScore.founder < 20) {
-            if (startup.foundersDetail && Object.keys({...startup.foundersDetail.toObject()}).length  > 0) {
+            if (
+                startup.foundersDetail &&
+                Object.keys({ ...startup.foundersDetail.toObject() }).length > 0
+            ) {
                 startup.profileScore.founder = 20;
                 score += 20;
             }
