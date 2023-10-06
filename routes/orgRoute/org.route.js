@@ -1,5 +1,5 @@
 const express = require('express');
-const adminRouter = require('./org.superAdmin.route');
+const superAdminRouter = require('./org.superAdmin.route');
 const teamRouter = require('./org.team.route');
 const AuthRoutes = require('./org.user.route');
 
@@ -15,8 +15,8 @@ const moduleRoutes = [
         route: AuthRoutes,
     },
     {
-        path: '/admin',
-        route: adminRouter,
+        path: '/s-admin',
+        route: superAdminRouter,
     },
     {
         path: '/team',

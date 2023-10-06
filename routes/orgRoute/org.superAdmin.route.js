@@ -1,12 +1,13 @@
 const express = require('express');
-const { loginAdmin } = require('../../controllers/orgControllers/org.superAdmin.controllers');
+const {getAllStartups}= require('../../controllers/orgControllers/org.superAdmin.controllers');
+const { roleVerifier } = require('../../middleware/roleVerifier');
+const { orgUserRole } = require('../../constants/org.user.constants');
 
-const adminRouter = express.Router();
+const routes = express.Router();
+const { ADMIN, CONTENT, DEVELOPMENT, MARKETING, SUPER_ADMIN } = orgUserRole;
 
-adminRouter.get('/', async (req, res) => {
-    res.send('admin route is ok');
-});
-adminRouter.post('/login', loginAdmin);
+routes.get('/all-startups', roleVerifier(SUPER_ADMIN), getAllStartups);
+// routes.post('/login', loginAdmin);
 
 // router.post('/forget-pass', zodValidator(forgetPassZodSchema), AuthControllers.resetPassword);
 // router.post(
@@ -15,4 +16,4 @@ adminRouter.post('/login', loginAdmin);
 //   AuthControllers.getAccessTokenByRefreshToken
 // );
 
-module.exports = adminRouter;
+module.exports = routes;

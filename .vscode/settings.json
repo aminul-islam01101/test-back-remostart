@@ -50,5 +50,5 @@
     "turboConsoleLog.delimiterInsideMessage": "🔥🔥",
     "turboConsoleLog.quote": "'",
     "turboConsoleLog.addSemicolonInTheEnd": true,
-    "editor.fontSize": 16
+    "editor.fontSize": 12
 }

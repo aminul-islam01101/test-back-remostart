@@ -6,15 +6,15 @@ const { orgUserRole } = require('../../constants/org.user.constants');
 const {
     createUser,
     loginUser,
+    loginSuperAdmin,
     changePassword,
 } = require('../../controllers/orgControllers/org.user.controllers');
 
 const { ADMIN, CONTENT, DEVELOPMENT, MARKETING, SUPER_ADMIN } = orgUserRole;
 
-
-
 AuthRoutes.post('/signup', roleVerifier(SUPER_ADMIN), createUser);
 AuthRoutes.post('/login', loginUser);
+AuthRoutes.post('/s-admin/login', loginSuperAdmin);
 
 // AuthRoutes.post('/refresh-token', AuthController.refreshToken);
 
@@ -24,5 +24,4 @@ AuthRoutes.post(
     changePassword
 );
 
-module.exports = AuthRoutes ;
-
+module.exports = AuthRoutes;
