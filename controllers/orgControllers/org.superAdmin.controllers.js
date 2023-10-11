@@ -1,4 +1,5 @@
 const { UserJobsModel } = require('../../models/job.schema');
+const orgUser = require('../../models/orgModels/org.usr.schema');
 const Startup = require('../../models/startup.schema');
 
 module.exports = {
@@ -27,25 +28,27 @@ module.exports = {
 
             const pipeline = [
                 {
-                  $lookup: {
-                    from: 'userjobs', // Name of the userjobs collection
-                    localField: 'email',
-                    foreignField: 'email',
-                    as: 'userJobs',
-                  },
+                    $lookup: {
+                        from: 'userjobs', // Name of the userjobs collection
+                        localField: 'email',
+                        foreignField: 'email',
+                        as: 'userJobs',
+                    },
                 },
                 {
-                  $project: {
-                    email: 1,
-                    startupName:1,
-                    fullName:1,
-                    registrationData:1,
-                    verificationStatus:1,
-                    jobCount: { $size: '$userJobs.jobs' }, // Calculate the job count
-                    // Include other startup fields as needed
-                  },
+                    $project: {
+                        email: 1,
+                        startupName: 1,
+                        fullName: 1,
+                        registrationData: 1,
+                        verificationRequest: 1,
+                        verificationStatus: 1,
+                        blocked: 1,
+                        jobCount: { $size: '$userJobs.jobs' }, // Calculate the job count
+                        // Include other startup fields as needed
+                    },
                 },
-              ];
+            ];
 
             const startups = await Startup.aggregate(pipeline);
             // const totalJobCount = await UserJobsModel.findOne({email:start})
@@ -53,6 +56,21 @@ module.exports = {
         } catch (error) {
             console.log(
                 '🌼 🔥🔥 file: org.superAdmin.controllers.js:9 🔥🔥 getAllStartups: 🔥🔥 error🌼',
+                error
+            );
+        }
+    },
+    getAllMembers: async (req, res) => {
+        try {
+            const members = await orgUser.find({ role: { $ne: 'super_admin' } });
+
+            res.status(200).json({
+                status: 'success',
+                data: members,
+            });
+        } catch (error) {
+            console.log(
+                '🌼 🔥🔥 file: org.superAdmin.controllers.js:66 🔥🔥 getAllMembers: 🔥🔥 error🌼',
                 error
             );
         }

@@ -11,7 +11,6 @@ const { createToken } = require('../../utils/jwtHelpers');
 const { sendMailWithNodeMailer } = require('../../configs/nodemailer');
 
 module.exports.loginSuperAdmin = async (req, res) => {
-
     const { ...loginData } = req.body;
     const { email, password } = loginData;
     try {
@@ -32,32 +31,32 @@ module.exports.loginSuperAdmin = async (req, res) => {
             });
         }
         const { id: userId, role, email: userEmail, needsPasswordChange } = isUserExist;
-        if (isUserExist.role!=='super_admin' && req.url.includes('s-admin')) {
+        if (isUserExist.role !== 'super_admin' && req.url.includes('s-admin')) {
             // Route includes 's-admin', so you can handle it here
-       
+
             return res.status(400).json({
                 status: 'error',
                 message: 'You are not super admin. try team login.',
             });
             // You can perform specific actions for routes that include 's-admin'
-          }
+        }
         const accessToken = createToken(
             { id: userId, role, email: userEmail },
             process.env.JWT_SECRET,
             '1d'
         );
-        const refreshToken = createToken(
-            { id: userId, role, email: userEmail },
-            process.env.JWT_SECRET,
-            '5d'
-        );
-        const cookieOptions = {
-            secure: false,
-            httpOnly: true,
-        };
+        // const refreshToken = createToken(
+        //     { id: userId, role, email: userEmail },
+        //     process.env.JWT_SECRET,
+        //     '5d'
+        // );
+        // const cookieOptions = {
+        //     secure: true,
+        //     sameSite: 'none',
+        //     httpOnly: true,
+        // };
 
-        res.cookie('refreshToken', `Bearer ${refreshToken}`, cookieOptions);
-
+        // res.cookie('refreshToken', `Bearer ${refreshToken}`, cookieOptions);
         res.status(200).json({
             status: 'success',
             message: 'User logged in successfully',
@@ -90,13 +89,13 @@ module.exports.loginUser = async (req, res) => {
         const { id: userId, role, email: userEmail, needsPasswordChange } = isUserExist;
         if (isUserExist && req.url.includes('s-admin')) {
             // Route includes 's-admin', so you can handle it here
-       
+
             return res.status(404).json({
                 status: 'error',
                 message: 'You are not super admin. try team login.',
             });
             // You can perform specific actions for routes that include 's-admin'
-          }
+        }
         const accessToken = createToken(
             { id: userId, role, email: userEmail },
             process.env.JWT_SECRET,
@@ -117,7 +116,7 @@ module.exports.loginUser = async (req, res) => {
         res.status(200).json({
             status: 'success',
             message: 'User logged in successfully',
-            data: { accessToken: `Bearer ${accessToken}`, needsPasswordChange },
+            data: { accessToken: `Bearer ${accessToken}`, needsPasswordChange, role },
         });
     } catch (error) {
         console.log(error);
@@ -139,7 +138,7 @@ module.exports.changePassword = async (req, res) => {
             isUserExist.password &&
             !(await orgUser.isPasswordMatched(oldPassword, isUserExist.password))
         ) {
-          return  res.status(400).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Old password is incorrect!',
             });
@@ -225,9 +224,38 @@ module.exports.createUser = async (req, res) => {
     }
     if (newUserAllData?.email) {
         res.status(201).json({
+            success: true,
             status: 'success',
             message: 'team user created successfully!',
             data: newUserAllData,
+        });
+    }
+};
+module.exports.loggedInOrgUser = async (req, res) => {
+    const { email, token } = req.user;
+
+    try {
+        const userExist = await orgUser
+            .findOne({ email }, { firstName: 1, lastName: 1, email: 1, role: 1 })
+            .lean();
+
+        if (!userExist) {
+            res.status(200).send({
+                success: false,
+                user: null,
+            });
+            return;
+        }
+
+        res.status(200).send({
+            success: true,
+            user: { ...userExist, token },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 'failed',
+            message: 'user not found',
+            data: null,
         });
     }
 };

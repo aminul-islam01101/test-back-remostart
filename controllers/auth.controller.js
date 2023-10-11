@@ -142,6 +142,7 @@ const register = async (req, res) => {
         email,
         role,
         companyEmail,
+        signInMethod,
         talentRequestPaymentDetails,
     } = req.body;
 
@@ -182,7 +183,7 @@ const register = async (req, res) => {
                 password: hash,
                 personalPhone: startupPhoneNumber,
                 role,
-                signInMethod: 'not-verified',
+                signInMethod,
                 confirmationToken: otp.toString(),
             });
 
@@ -205,7 +206,7 @@ const register = async (req, res) => {
                 password: hash,
                 personalPhone,
                 role,
-                signInMethod: 'not-verified',
+                signInMethod,
                 confirmationToken: otp.toString(),
             });
 
@@ -223,9 +224,11 @@ const register = async (req, res) => {
         };
 
         // Sending email within the transaction
-        const message = await sendMailWithNodeMailer(mailData);
-        if (!message.messageId) {
-            throw new Error('Email failure');
+        if (signInMethod !== 'in-house') {
+            const message = await sendMailWithNodeMailer(mailData);
+            if (!message.messageId) {
+                throw new Error('Email failure');
+            }
         }
 
         await session.commitTransaction();

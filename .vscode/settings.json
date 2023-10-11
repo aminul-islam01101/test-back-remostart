@@ -20,7 +20,7 @@
     "eslint.alwaysShowStatus": true,
     // emmet
     "emmet.triggerExpansionOnTab": true,
-    "cSpell.words": ["comix", "fieldname", "remo", "remoforce"],
+    "cSpell.words": ["comix", "fieldname", "inhouse", "remo", "remoforce"],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#068b8b",
         "activityBar.background": "#068b8b",

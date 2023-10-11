@@ -81,6 +81,7 @@ const startupUserSchema = new mongoose.Schema({
         minLength: 3,
     },
 
+
     email: {
         type: String,
         // required: true,
@@ -297,6 +298,10 @@ const startupUserSchema = new mongoose.Schema({
         registration: { type: Number, default: 0 },
         founder: { type: Number, default: 0 },
     },
+    blocked: {
+        type: Boolean,
+        default: false, // Default value is set to false
+      },
     //
     timestamp: {
         type: Date,

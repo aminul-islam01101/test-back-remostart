@@ -8,6 +8,9 @@ module.exports.roleVerifier =
         try {
             // Get the access token from the authorization header
             const token = req.headers.authorization;
+            const { refreshToken } = req.cookies;
+            console.log('🌼 🔥🔥 file: roleVerifier.js:12 🔥🔥 req.cookies', req.cookies);
+
 
             if (!token) {
                 res.status(401).send({
@@ -39,7 +42,7 @@ module.exports.roleVerifier =
             } catch (accessTokenError) {
                 // If the access token is expired, try refreshing it with the refresh token
 
-                const { refreshToken } = req.cookies;
+                // const { refreshToken } = req.cookies;
 
                 if (!refreshToken) {
                     res.status(401).send({
