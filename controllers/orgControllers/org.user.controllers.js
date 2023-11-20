@@ -203,7 +203,7 @@ module.exports.createUser = async (req, res) => {
         const mailData = {
             to: [user.email],
             subject: 'welcome to remostarts organizer panel',
-            html: createUserEmail (user.email, user.password, user.role, process.env.LOGIN_LINK),
+            html: createUserEmail (user.email, user.password, user.role, process.env.ORG_LOGIN_LINK),
         };
 
         // Sending email within the transaction
