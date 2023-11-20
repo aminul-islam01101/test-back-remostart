@@ -9,8 +9,6 @@ module.exports.roleVerifier =
             // Get the access token from the authorization header
             const token = req.headers.authorization;
             const { refreshToken } = req.cookies;
-            console.log('🌼 🔥🔥 file: roleVerifier.js:12 🔥🔥 req.cookies', req.cookies);
-
 
             if (!token) {
                 res.status(401).send({
@@ -28,8 +26,6 @@ module.exports.roleVerifier =
 
                 const verifiedUser = verifyAccessToken(accessToken, process.env.JWT_SECRET);
                 req.user = verifiedUser;
-                console.log('🌼 🔥🔥 file: roleVerifier.js:28 🔥🔥 verifiedUser🌼', verifiedUser);
-
                 if (requiredRoles.length && !requiredRoles.includes(verifiedUser.role)) {
                     res.status(401).send({
                         success: false,
@@ -86,8 +82,6 @@ module.exports.roleVerifier =
                     });
 
                     req.user = verifiedRefreshToken;
-                    console.log('🌼 🔥🔥 file: roleVerifier.js:84 🔥🔥 req.user🌼', req.user);
-
                     
                     next();
                 } catch (refreshTokenError) {

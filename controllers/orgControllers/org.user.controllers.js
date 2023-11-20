@@ -17,7 +17,7 @@ module.exports.loginSuperAdmin = async (req, res) => {
         const isUserExist = await orgUser.isUserExist(email);
         if (!isUserExist) {
             return res.status(404).json({
-                status: 'success',
+                status: 'false',
                 message: 'User does not exist',
             });
         }
@@ -26,7 +26,7 @@ module.exports.loginSuperAdmin = async (req, res) => {
             !(await orgUser.isPasswordMatched(password, isUserExist.password))
         ) {
             return res.status(404).json({
-                status: 'success',
+                status: 'false',
                 message: 'Password is incorrect',
             });
         }

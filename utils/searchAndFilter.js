@@ -34,13 +34,14 @@ exports.searchFilterCalculator = (
     // for or filters like checkbox, tags('skills', 'location', 'tags')
     if (Object.keys(orFilters).length) {
         Object.entries(orFilters).forEach(([field, value]) => {
-            andConditions.push({
-                $or: [
-                    {
-                        [field]: { $in: value },
-                    },
-                ],
-            });
+           andConditions.push({
+                    $or: [
+                        {
+                            [field]: { $in: value },
+                        },
+                    ],
+                });
+            
         });
     }
 
@@ -67,16 +68,54 @@ exports.searchFilterCalculator = (
     // }
     // default condition
     if (Object.keys(defaultFindCondition).length) {
-        andConditions.push({
-            $or: [...defaultFindCondition.$or],
-        });
+        if (defaultFindCondition.$or) {
+            andConditions.push({
+                $or: [...defaultFindCondition.$or],
+            });
+        }
     }
     // and condition filter('jobStatus',and if any more,  should be added on FilterableFields )
+    // if (Object.keys(andFilters).length) {
+    //     andConditions.push({
+    //         $and: Object.entries(andFilters).map(([field, value]) => ({
+
+    //             [field]: value,
+    //         })),
+    //     });
+    // }
+
     if (Object.keys(andFilters).length) {
         andConditions.push({
-            $and: Object.entries(andFilters).map(([field, value]) => ({
-                [field]: value,
-            })),
+            $and: Object.entries(andFilters).map(([field, value]) => {
+                // Check if the field is "countries" and map it to "registrationData.country"
+                let mappedField = field;
+                if (field === 'countries') {
+                    mappedField = 'registrationData.country';
+                }
+                if (field === 'location') {
+                    mappedField = 'personalDetails.country';
+                }
+                if (field === 'selectedSkills') {
+                    const skillsArray = Array.isArray(value) ? value :  [value];
+                    return {
+                        $and: skillsArray.map((item) => ({
+                            [`${field}.skillName`]: item,
+                        })),
+                    };
+                }
+                if (field === 'level') {
+                    const levels = Array.isArray(value) ? value : [value];
+                    return {
+                        $and: levels.map((item) => ({
+                            [`selectedSkills.level`]: item,
+                        })),
+                    };
+                }
+
+                return {
+                    [mappedField]: value,
+                };
+            }),
         });
     }
     // if (Object.keys(filtersData).length) {
@@ -124,10 +163,6 @@ exports.searchFilterCalculator = (
 
     const whereConditions =
         andConditions.length > 0 ? { $and: andConditions } : defaultFindCondition;
-    console.log(
-        '🌼 🔥🔥 file: searchAndFilter.js:132 🔥🔥 whereConditions🌼',
-        JSON.stringify(whereConditions)
-    );
     return whereConditions;
 };
 

@@ -196,7 +196,18 @@ const remoforceSchema = mongoose.Schema({
         projects: {type: Number, default:0},
         accounts: {type: Number, default:0},
     },
-
+    blocked: {
+        type: Boolean,
+        default: false, // Default value is set to false
+      },
+      verificationRequested: {
+        type: Boolean,
+        default: false, // Default value is set to false
+      },
+      verified: {
+        type: Boolean,
+        default: false, // Default value is set to false
+      },
   
   
     timestamp: {

@@ -394,12 +394,14 @@ const getAllJobs = async (req, res) => {
     // constants
     const jobFilterableFields = ['jobStatus', 'searchTerm', 'tags'];
     const jobOrFields = ['skills', 'location', 'tags']; // tags and checkboxes(multiple field can be selected and all result(containing any of the selected field will be shown) )
-    const jobSearchableFields = ['title', 'description'];
+    const jobSearchableFields = ['title', 'description', 'email'];
     const jobTagSearchableFields = ['title', 'description', 'categoryName', 'skills'];
 
     // pick modifier
     const filters = pick(req.query, jobFilterableFields);
     const orFilter = pick(req.query, jobOrFields);
+ 
+
     const paginationOptions = pick(req.query, paginationFields);
 
     // arguments
@@ -419,7 +421,7 @@ const getAllJobs = async (req, res) => {
 
     const whereConditions = searchFilterCalculator(
         searchTerm,
-        jobSearchableFields,
+        jobSearchableFields,    
         andFilters,
         orFilter,
         /* no need these(covered in orFilters) two fields if tags field only look tags field in data base. should pass if tags will look for multiple fields */
@@ -478,12 +480,12 @@ const getAllRemoJobsFilters = async (req, res) => {
             {
                 $group: {
                     _id: null,
-                    skills: { $addToSet: '$skills' }, // Collect all unique 'skills' values
+                    skills: { $addToSet: '$skills' }, 
                     locations: { $addToSet: '$location' },
                     jobStatus: { $addToSet: '$jobStatus' },
                 },
             },
-            { $project: { _id: 0, skills: 1, locations: 1, jobStatus: 1 } }, // Exclude _id field and keep only 'skills' field
+            { $project: { _id: 0, skills: 1, locations: 1, jobStatus: 1 } },
         ]);
 
         const finalResult = result.length

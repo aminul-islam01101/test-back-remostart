@@ -195,6 +195,7 @@ const register = async (req, res) => {
                 fullName: `${firstName} ${lastName}`,
                 email,
                 personalPhone,
+                verified: false, verificationRequested: false, blocked:false 
             });
 
             const createdRemoForce = await newRemoForce.save({ session });
