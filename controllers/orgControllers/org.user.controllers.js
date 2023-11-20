@@ -9,6 +9,7 @@ const {
 const orgUser = require('../../models/orgModels/org.usr.schema');
 const { createToken } = require('../../utils/jwtHelpers');
 const { sendMailWithNodeMailer } = require('../../configs/nodemailer');
+const { createUserEmail } = require('../../views/creTeamMemberEmail');
 
 module.exports.loginSuperAdmin = async (req, res) => {
     const { ...loginData } = req.body;
@@ -202,7 +203,7 @@ module.exports.createUser = async (req, res) => {
         const mailData = {
             to: [user.email],
             subject: 'welcome to remostarts organizer panel',
-            html: `you are new ${user.role}`,
+            html: createUserEmail (user.email, user.password, user.role, process.env.LOGIN_LINK),
         };
 
         // Sending email within the transaction
