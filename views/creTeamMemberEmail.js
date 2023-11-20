@@ -16,7 +16,7 @@ ${invitationLink}
 We look forward to having you on board!
 
 Best regards,
-Your Team
+Your Team remostart
 `;
 
 console.log(emailTemplate);
